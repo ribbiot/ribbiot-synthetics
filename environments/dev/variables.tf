@@ -60,3 +60,12 @@ variable "dev_client_secret" {
   type        = string
   sensitive   = true
 }
+
+# Optional: used by Asset Service query tests that need account-scoped data (e.g. getAssetImportUploadPresignedUrl).
+# Set when enabling those tests in graphql_asset_service.tf.
+variable "dev_asset_account_id" {
+  description = "Dev account ID for Asset Service query tests (e.g. getAssetImportUploadPresignedUrl). Leave empty until tuning."
+  type        = string
+  default     = ""
+  sensitive   = true
+}

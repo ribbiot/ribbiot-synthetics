@@ -5,7 +5,7 @@ output "railway_health_check_test_id" {
 
 output "auth0_graphql_asset_system_check_test_id" {
   description = "Datadog test ID for GraphQL: assetSystemCheck."
-  value       = datadog_synthetics_test.auth0_graphql_dev.id
+  value       = datadog_synthetics_test.auth0_graphql_asset_system_check_dev.id
 }
 
 output "auth0_graphql_user_system_check_test_id" {
