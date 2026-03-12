@@ -1,0 +1,13 @@
+# ------------------------------------------------------------------------------
+# Example tfvars for prod. Copy to terraform.tfvars and fill in (do not commit tfvars).
+# ------------------------------------------------------------------------------
+
+# dd_api_key  = "your-datadog-api-key"
+# dd_app_key  = "your-datadog-app-key"
+dd_api_url = "https://api.datadoghq.com"
+
+default_locations = ["aws:us-east-1", "aws:us-west-2", "aws:eu-west-1"]
+default_frequency = 900
+
+example_health_url  = "https://api.yourcompany.com/health"
+example_test_status = "live"
