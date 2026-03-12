@@ -30,7 +30,15 @@ Optional:
 |----------|-------------|---------|
 | `TF_VAR_dd_api_url` | Datadog API base URL (site) | `https://api.datadoghq.com` (US1). Use `https://api.datadoghq.eu` for EU. |
 
-**Never commit** `terraform.tfvars` or any file containing real API/app keys. Use `terraform.tfvars.example` as a template only.
+**Dev multi-step test (Auth0 → GraphQL)** also needs (set via `TF_VAR_*` or in `.env`; never commit):
+
+| Variable | Description |
+|----------|-------------|
+| `TF_VAR_dev_username` | Auth0 dev username (email) |
+| `TF_VAR_dev_password` | Auth0 dev password |
+| `TF_VAR_dev_client_secret` | Auth0 dev client secret |
+
+**Never commit** `terraform.tfvars` or any file containing real API/app keys or Auth0 credentials. Use `terraform.tfvars.example` as a template only.
 
 ## Repository Structure
 
@@ -60,6 +68,7 @@ Optional:
 
 - **Environments**: Each environment (`dev`, `prod`) has its own Terraform state. Run `terraform` from the chosen environment directory.
 - **Module**: `modules/synthetic-api-test` exposes inputs (name, URL, method, headers, assertions, locations, frequency, tags, status, message, etc.) and creates a single `datadog_synthetics_test` API test.
+- **Multi-step tests**: Use `datadog_synthetics_test` with `subtype = "multi"` and multiple `api_step` blocks (e.g. Auth0 token then GraphQL). See `environments/dev/graphql.tf` and `.cursor/rules/datadog-graphql-synthetics.mdc` for implementation-derived instructions and how to add more GraphQL queries.
 
 ## Quick Start
 

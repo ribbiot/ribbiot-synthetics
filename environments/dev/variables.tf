@@ -33,15 +33,30 @@ variable "default_frequency" {
   default     = 300
 }
 
-# Example test configuration
-variable "example_health_url" {
-  description = "URL for the example health check synthetic test."
+# ------------------------------------------------------------------------------
+# Auth0 + GraphQL multi-step test (dev). Set via TF_VAR_* or .env; never commit.
+# ------------------------------------------------------------------------------
+
+variable "dev_auth0_domain" {
+  description = "Auth0 dev domain (e.g. devauth.ribbiot.com). Used in multi-step test."
   type        = string
-  default     = "https://httpbin.org/get"
+  default     = "devauth.ribbiot.com"
 }
 
-variable "example_test_status" {
-  description = "Status of the example test: live or paused."
+variable "dev_username" {
+  description = "Auth0 dev username (email). Set via TF_VAR_dev_username."
   type        = string
-  default     = "live"
+  sensitive   = true
+}
+
+variable "dev_password" {
+  description = "Auth0 dev password. Set via TF_VAR_dev_password; never commit."
+  type        = string
+  sensitive   = true
+}
+
+variable "dev_client_secret" {
+  description = "Auth0 dev client secret. Set via TF_VAR_dev_client_secret; never commit."
+  type        = string
+  sensitive   = true
 }

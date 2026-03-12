@@ -3,14 +3,16 @@
 # ------------------------------------------------------------------------------
 
 variable "dd_api_key" {
-  description = "Datadog API key. Set via TF_VAR_dd_api_key or DD_API_KEY."
+  description = "Datadog API key. Set via TF_VAR_dd_api_key, DD_API_KEY (e.g. in .env), or enter when prompted."
   type        = string
+  default     = ""
   sensitive   = true
 }
 
 variable "dd_app_key" {
-  description = "Datadog application key. Set via TF_VAR_dd_app_key or DD_APP_KEY."
+  description = "Datadog application key. Set via TF_VAR_dd_app_key, DD_APP_KEY (e.g. in .env), or enter when prompted."
   type        = string
+  default     = ""
   sensitive   = true
 }
 

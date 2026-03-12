@@ -1,0 +1,58 @@
+---
+description: GraphQL synthetic tests — implementation guide from environments/dev/graphql.tf
+globs: environments/**/*.tf,**/graphql.tf
+alwaysApply: false
+---
+
+# GraphQL synthetics (Auth0 → GraphQL)
+
+Instructions below are derived from the working implementation in `environments/dev/graphql.tf`. Follow this pattern when adding or changing GraphQL tests.
+
+## File and layout
+
+- **File**: `environments/<env>/graphql.tf` (e.g. `environments/dev/graphql.tf`). One file per environment for GraphQL multi-step tests.
+- **Test name**: `"GraphQL: <queryName>"` where `<queryName>` is the GraphQL operation (e.g. `GraphQL: assetSystemCheck`).
+- **Tags**: Use `project:graphql`, not `project:railway`. Build tags as: `concat([for t in local.base_tags : t if t != "project:railway"], ["project:graphql"])` so base tags stay except project is graphql.
+- **Locations**: Use `local.railway_test_locations` (or an env-specific locations local) so tests run from the same regions as other synthetics.
+
+## Secrets and global variables
+
+- **Never** commit credentials. Pass them via Terraform variables (e.g. `TF_VAR_dev_username`, `TF_VAR_dev_password`, `TF_VAR_dev_client_secret`) or from `.env` after sourcing.
+- Create one `datadog_synthetics_global_variable` per credential: domain, username, password (secure), client_secret (secure). Use `secure = true` for password and client_secret.
+- In the test, add a `config_variable` block per global variable: `config_variable { name = "VAR_NAME", id = datadog_synthetics_global_variable.<resource>.id, type = "global" }`.
+- In request bodies and URLs, reference them with **no spaces**: `{{DEV_USERNAME}}`, `{{DEV_PASSWORD}}`, `{{DEV_CLIENT_SECRET}}`, `{{DEV_AUTH0_DOMAIN}}`.
+
+## Step 1: Auth0 token
+
+- **URL**: `https://{{ DEV_AUTH0_DOMAIN }}/oauth/token` (spaces in this template are fine for the domain).
+- **Method**: POST. **Body type**: `application/x-www-form-urlencoded`.
+- **Body**: Single line, parameter order: `username`, `password`, `client_id`, `client_secret`, `grant_type=password`, `audience` (URL-encoded), `redirect_uri` (URL-encoded), `scope` (scopes URL-encoded, space-separated). Use `{{DEV_USERNAME}}`, `{{DEV_PASSWORD}}`, `{{DEV_CLIENT_SECRET}}` with no spaces inside the braces.
+- **Headers**: `Content-Type = application/x-www-form-urlencoded`.
+- **Extract token**: `extracted_value { name = "BEARER_TOKEN", type = "http_body", parser { type = "json_path", value = "$.access_token" } }`.
+- **Assert**: `assertion { type = "statusCode", operator = "is", target = "200" }`.
+- **Audience and scopes**: Must be valid for your Auth0 password grant (audience and scopes configured in Auth0). If you get invalid audience or insufficient scopes, adjust audience and scope list to match Auth0.
+
+## Step 2: GraphQL request
+
+- **URL**: Your GraphQL endpoint (e.g. `https://ribbiot-router-dev.up.railway.app/graphql`).
+- **Method**: POST. **Body type**: `application/json`.
+- **Body**: JSON with `"query"` and `"variables"`. In Terraform, escape newlines in the query string as `\\n` (e.g. `"{\"query\":\"query Query($input: SystemCheckInput) {\\n  assetSystemCheck(input: $input) {\\n    message\\n  }\\n}\",\"variables\":{...}}"`). Prefer a `local.graphql_body` (or per-query local) for readability.
+- **Headers**: `Content-Type = "application/json"`, `Authorization = "Bearer {{BEARER_TOKEN}}"` (no spaces around `BEARER_TOKEN`).
+- **Assert**: At least `statusCode` 200. Add body validation with `assertion { type = "body", operator = "validatesJSONPath", targetjsonpath { jsonpath = "$.data.<queryName>.<field>", operator = "is", targetvalue = "<expected>" } }` (e.g. `$.data.assetSystemCheck.message` equals `"Asset Service is Running!"`).
+
+## Options
+
+- `options_list { tick_every = 300; retry { count = 2, interval = 300 } }` (or env-appropriate values).
+
+## Adding a new GraphQL query
+
+1. Add a new `api_step` in the same or a new `datadog_synthetics_test` in `graphql.tf`.
+2. Keep step 1 (Auth0) as the first step; step 2 (and any further steps) use `Authorization = "Bearer {{BEARER_TOKEN}}"`.
+3. Define the request body in a `locals` block (e.g. `graphql_body_my_query`) with the query and variables; escape newlines as `\\n`.
+4. For the new step set `request_definition.body` to that local, add `statusCode` assertion and, if needed, `validatesJSONPath` for `data.<queryName>.<field>`.
+5. If the new query is the only one in a new test, set the test name to `"GraphQL: <queryName>"` and use the same tag/location pattern as above.
+
+## Reference
+
+- **Implementation**: `environments/dev/graphql.tf`.
+- **Railway (single-step)**: `environments/dev/railway.tf` and `modules/synthetic-api-test`.
