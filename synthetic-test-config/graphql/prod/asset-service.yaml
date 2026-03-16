@@ -1,0 +1,98 @@
+# GraphQL synthetic data for Asset inventory service — PROD only.
+# Schema: docs/synthetic-test-config-schema.md
+# Supply prod-specific IDs and values here; dev uses graphql/dev/asset-service.yaml.
+
+scope: graphql
+environment: prod
+service: Asset inventory service
+graph: Prod-AssetService
+terraform_file: environments/prod/graphql_asset_service.tf
+
+queries:
+  - name: assetSystemCheck
+    synthetic_data: []
+    implemented: false
+    # locations: []  # set when enabling
+
+  - name: getAssetImportUploadPresignedUrl
+    synthetic_data:
+      - key: PROD_ASSET_ACCOUNT_ID
+        value: ""  # set prod account ID when enabling
+        purpose: Account ID for presigned upload URL (prod)
+        where_to_set: Terraform global PROD_ASSET_ACCOUNT_ID
+        format: ID
+    implemented: false
+
+  - name: listMeasureUnits
+    synthetic_data: []
+    implemented: false
+
+  - name: assetTemplates
+    synthetic_data: []
+    implemented: false
+
+  - name: baseAssetTemplates
+    synthetic_data: []
+    implemented: false
+
+  - name: assets
+    synthetic_data: []
+    implemented: false
+
+  - name: assetTemplate
+    synthetic_data:
+      - key: PROD_ASSET_TEMPLATE_ID
+        purpose: Asset template ID (prod)
+        where_to_set: TBD
+        format: ID
+    implemented: false
+
+  - name: baseAssetTemplate
+    synthetic_data:
+      - key: PROD_BASE_ASSET_TEMPLATE_ID
+        purpose: Base asset template ID (prod)
+        where_to_set: TBD
+        format: ID
+    implemented: false
+
+  - name: asset
+    synthetic_data:
+      - key: PROD_ASSET_ID
+        value: ""  # set prod asset ID when enabling
+        purpose: Asset ID for asset(id) query (prod)
+        where_to_set: Terraform global PROD_ASSET_ID
+        format: ID
+    implemented: false
+
+  - name: getAvailableAssetSchedule
+    synthetic_data:
+      - key: "(input)"
+        purpose: startDate (Date!), optional endDate, timezone, etc.
+        where_to_set: TBD
+        format: AvailableAssetScheduleInput
+    implemented: false
+
+  - name: getAvailableAssetScheduleForTask
+    synthetic_data:
+      - key: "(input)"
+        purpose: startDate (Date!), optional task/context fields
+        where_to_set: TBD
+        format: AvailableAssetScheduleForTaskInput
+    implemented: false
+
+  - name: scheduledAssetsForJobs
+    synthetic_data:
+      - key: "(input)"
+        purpose: jobInputs array with after, before (DateTime!), optional complexJobId
+        where_to_set: TBD
+        format: ScheduledAssetsForJobsInput
+    implemented: false
+
+  - name: scheduledAssetsForTasks
+    synthetic_data:
+      - key: PROD_SCHEDULED_ASSETS_TASK_IDS
+        value: []  # set prod task ID(s) when enabling
+        purpose: "Task ID(s) for scheduledAssetsForTasks (prod)"
+        where_to_set: Terraform global PROD_SCHEDULED_ASSETS_TASK_IDS
+        format: JSON array of ID
+    implemented: false

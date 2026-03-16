@@ -30,7 +30,7 @@ resource "datadog_synthetics_global_variable" "dev_client_secret" {
   value  = urlencode(var.dev_client_secret)
 }
 
-# Synthetic data globals: one per key in synthetic_data_values (from synthetic-data/*.yaml).
+# Synthetic test config globals: one per key in synthetic_data_values (from synthetic-test-config/graphql/<env>/*.yaml).
 # Values are always strings (script JSON-encodes arrays).
 resource "datadog_synthetics_global_variable" "synthetic_data" {
   for_each = var.synthetic_data_values

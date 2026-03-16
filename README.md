@@ -63,7 +63,7 @@ For npm scripts, put these variables in a `.env` file at the repo root (copy fro
 │   ├── apollo-mcp.yaml            # Apollo MCP config (dev; no auth)
 │   └── apollo-mcp-with-auth.yaml  # Apollo MCP config with Bearer token (dev)
 ├── docs/                  # Approach docs: schema ingestion, MCP, synthetics, dev-only scope
-├── synthetic-data/        # Per-service synthetic data: which query uses which data (YAML per service)
+├── synthetic-test-config/ # Source of truth for GraphQL synthetics: input data, geos, on/off per env, assertions (see synthetic-test-config/README.md)
 ├── package.json
 ├── tsconfig.json
 ├── scripts/
@@ -107,7 +107,8 @@ From the repo root, after `npm install`:
 | `npm run tf:init:dev` / `tf:init:prod` | Run `terraform init` in that environment (loads `.env`). |
 | `npm run tf:plan:dev` / `tf:plan:prod` | Run `terraform plan` (loads `.env`). |
 | `npm run tf:apply:dev` / `tf:apply:prod` | Run `terraform init` then `terraform apply -auto-approve` (loads `.env`). |
-| `npm run tfvars:from-synthetic-data` | Generate `environments/dev/synthetic-data.auto.tfvars.json` from `synthetic-data/*.yaml` so Terraform gets injected values without setting variables by hand. Run after editing synthetic data, then plan/apply. |
+| `npm run tfvars:from-synthetic-test-config` | Generate `environments/<env>/synthetic-test-config.auto.tfvars.json` from `synthetic-test-config/graphql/<env>/*.yaml` so Terraform gets injected values. Run after editing config, then plan/apply. |
+| `npm run assertions:from-response` | Derive assertion YAML from a sample JSON response (e.g. dev GraphQL). Pass file path and optional `--query <name>`. See synthetic-test-config/README.md. |
 | `npm run tf:validate:dev` / `tf:validate:prod` | Run `terraform validate` (loads `.env`). |
 | **MCP (dev only)** | |
 | `npm run mcp:select-schema` | Prompt to choose which federated schema to work on (Asset, Job, Timecard, User, Supergraph, or router). |

@@ -27,7 +27,7 @@ locals {
   ]
 
   # 2. getAssetImportUploadPresignedUrl(accountId: ID!): String!
-  # Uses DEV_ASSET_ACCOUNT_ID (from synthetic_data_values, see synthetic-data/asset-service.yaml).
+  # Uses DEV_ASSET_ACCOUNT_ID (from synthetic_data_values, see synthetic-test-config/graphql/dev/asset-service.yaml).
   graphql_body_get_asset_import_upload_presigned_url = "{\"query\":\"query GetAssetImportUploadPresignedUrl($accountId: ID!) {\\n  getAssetImportUploadPresignedUrl(accountId: $accountId)\\n}\",\"variables\":{\"accountId\":\"{{DEV_ASSET_ACCOUNT_ID}}\"}}"
 
   # 3. listMeasureUnits: [GqlMeasureUnit!]!

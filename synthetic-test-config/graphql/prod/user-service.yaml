@@ -1,0 +1,10 @@
+# GraphQL synthetic data for User service — PROD only.
+# Schema: docs/synthetic-test-config-schema.md
+
+scope: graphql
+environment: prod
+service: User service
+graph: Prod-UserService
+terraform_file: environments/prod/graphql_user_service.tf
+
+queries: []

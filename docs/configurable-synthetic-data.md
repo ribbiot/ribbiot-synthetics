@@ -22,7 +22,7 @@ This cycle repeats as new queries, mutations, or workflows are added: Cursor add
 
 A **single source of truth** that describes what data the framework needs. Maintained by Cursor (or humans) as the synthetic suite grows.
 
-- **Location**: **[synthetic-data/](../synthetic-data/)** — one YAML file per service graph (e.g. `asset-service.yaml`), plus `docs/required-synthetic-data.md` for a short index.
+- **Location**: **[synthetic-test-config/](../synthetic-test-config/)** — YAML per service per environment (e.g. `graphql/dev/asset-service.yaml`), plus `docs/required-synthetic-data.md` for a short index.
 - **Contents** (per required item):
   - **Key / name** — Identifier used in the config store and in code (e.g. `TEST_USER_ID`, `SAMPLE_ASSET_ID`).
   - **Purpose** — Short description (e.g. “User ID for `user(id)` query synthetic”).

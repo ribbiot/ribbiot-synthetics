@@ -1,9 +1,0 @@
-# Synthetic data for User service (Dev-UserService).
-# Which query uses which data; where to set values (Terraform / globals).
-
-service: User service
-graph: Dev-UserService
-terraform_file: environments/dev/graphql_user_service.tf
-
-queries: []
-# Add entries as you implement query synthetics (e.g. userSystemCheck, formTemplate, etc.).

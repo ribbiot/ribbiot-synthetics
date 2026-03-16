@@ -20,7 +20,8 @@
     "tf:apply:prod": "dotenv -e .env -- bash -c 'cd environments/prod && terraform init -input=false && terraform apply -input=false -auto-approve'",
     "tf:validate:dev": "dotenv -e .env -- bash -c 'cd environments/dev && terraform validate'",
     "tf:validate:prod": "dotenv -e .env -- bash -c 'cd environments/prod && terraform validate'",
-    "tfvars:from-synthetic-data": "tsx scripts/synthetic-data-to-tfvars.ts"
+    "tfvars:from-synthetic-test-config": "tsx scripts/synthetic-test-config-to-tfvars.ts",
+    "assertions:from-response": "tsx scripts/derive-assertions-from-response.ts"
   },
   "devDependencies": {
     "@types/inquirer": "^9.0.9",

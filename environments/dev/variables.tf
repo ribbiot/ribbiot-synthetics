@@ -62,12 +62,12 @@ variable "dev_client_secret" {
 }
 
 # ------------------------------------------------------------------------------
-# Synthetic data: values from synthetic-data/*.yaml, injected by script.
-# Run: npm run tfvars:from-synthetic-data (writes synthetic-data.auto.tfvars.json).
+# Synthetic test config: values from synthetic-test-config/graphql/<env>/*.yaml, injected by script.
+# Run: npm run tfvars:from-synthetic-test-config (writes synthetic-test-config.auto.tfvars.json).
 # No need to set these by hand unless you override.
 # ------------------------------------------------------------------------------
 variable "synthetic_data_values" {
-  description = "Map of global variable name -> string value (e.g. DEV_ASSET_ACCOUNT_ID, DEV_SCHEDULED_ASSETS_TASK_IDS). Populated from synthetic-data/*.yaml via scripts/synthetic-data-to-tfvars.ts. Arrays in YAML are JSON-encoded as strings."
+  description = "Map of global variable name -> string value (e.g. DEV_ASSET_ACCOUNT_ID, DEV_SCHEDULED_ASSETS_TASK_IDS). Populated from synthetic-test-config/graphql/<env>/*.yaml via scripts/synthetic-test-config-to-tfvars.ts. Arrays in YAML are JSON-encoded as strings."
   type        = map(string)
   default     = {}
 }
