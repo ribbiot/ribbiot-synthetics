@@ -1,0 +1,63 @@
+---
+description: Config-first workflow — add synthetics from a working GraphQL request + response
+globs: synthetic-test-config/**/*.yaml,docs/synthetic-test-config-schema.md,scripts/derive-assertions-from-response.ts,scripts/synthetic-test-config-to-tfvars.ts
+alwaysApply: true
+---
+
+# Synthetic test config: config-first workflow
+
+The framework is **config-first**. The user supplies a **working GraphQL request and its response** (e.g. from dev). From that, we update **synthetic-test-config** (input data + assertions). The user then runs scripts to regenerate Terraform inputs and applies to Datadog.
+
+## Goal
+
+1. **User provides**: An example of a working GraphQL request (e.g. curl or query + variables) and its response body (JSON).
+2. **We do**: Update `synthetic-test-config/graphql/<env>/<service>.yaml` — add or update the query entry with required **input data** (from the request) and **assertions** (derived from the response).
+3. **User runs**: `npm run tfvars:from-synthetic-test-config` then `npm run tf:plan:dev` (or prod); then `npm run tf:apply:dev` (or prod) to push to Datadog.
+
+## When the user pastes a GraphQL request + response
+
+1. **Identify**
+   - **Query name**: From the request body (e.g. `scheduledAssetsForTasks`, `assetSystemCheck`).
+   - **Service**: Which GraphQL service (Asset, Job, User, Timecard) → which file: `synthetic-test-config/graphql/dev/asset-service.yaml` (or job, user, timecard).
+   - **Environment**: Usually dev when the user says "from our dev environment"; use `graphql/dev/`. For prod, use `graphql/prod/`.
+
+2. **Required input data (synthetic_data)**
+   - From the request **variables**, list every variable that the query needs (e.g. `input.taskIds`, `accountId`).
+   - For each variable, add a `synthetic_data` item:
+     - **key**: Global variable name in SCREAMING_SNAKE_CASE (e.g. `DEV_SCHEDULED_ASSETS_TASK_IDS`, `DEV_ASSET_ACCOUNT_ID`). Use `DEV_` prefix for dev, `PROD_` for prod.
+     - **value**: The actual value from the user's request (string or array of IDs). Use the same shape as in the request (array stays array).
+     - **purpose**: One line describing what it's for (e.g. "Task ID(s) for scheduledAssetsForTasks(input: { taskIds })").
+     - **where_to_set**: e.g. "Terraform global DEV_SCHEDULED_ASSETS_TASK_IDS".
+     - **format**: e.g. "ID", "JSON array of ID".
+   - If the query has no variables (e.g. `assetSystemCheck` with fixed input), `synthetic_data: []`.
+
+3. **Assertions (from the response)**
+   - Derive JSONPath assertions from the response body so the synthetic test can validate the same shape.
+   - **Option A**: Run the derive script and paste output:
+     - Save the response JSON to a file (e.g. `response.json`).
+     - Run: `npx tsx scripts/derive-assertions-from-response.ts response.json --query <queryName>`.
+     - Paste the printed `assertions:` YAML under the query entry in the service file.
+   - **Option B**: Manually add assertions for the fields that matter:
+     - For each important leaf in `data.<queryName>`, add: `{ jsonpath: "$.data.<queryName>.<path>", operator: "is", targetvalue: "<value from response>" }`.
+   - Prefer assertions on stable, meaningful fields (e.g. message, status, first element of a list). Omit or relax flaky or highly variable values (timestamps, IDs that change).
+
+4. **Query entry shape**
+   - Ensure the query has: `name`, `synthetic_data` (from step 2), `implemented` (set to `false` until a Terraform test exists for it; `true` if we're only updating config for an existing test), optional `locations`, optional `notes`, and `assertions` (from step 3).
+   - If the query is new in the file, add a full entry following the schema in `docs/synthetic-test-config-schema.md`.
+
+5. **Tell the user what to run**
+   - "Run `npm run tfvars:from-synthetic-test-config` to regenerate Terraform variable files from the config, then `npm run tf:plan:dev` to preview and `npm run tf:apply:dev` to apply to Datadog."
+   - If they added a **new** test (new query with `implemented: true`), note that the Terraform test resource itself still needs to be added in `environments/dev/graphql_asset_service.tf` (or the right service); the config supplies the **data and assertions**, but the test definition (steps, name, locations) is still in Terraform until we automate that.
+
+## Schema and scripts
+
+- **Schema**: `docs/synthetic-test-config-schema.md` — full YAML shape (scope, environment, queries[].synthetic_data, implemented, locations, assertions).
+- **Config location**: `synthetic-test-config/graphql/<env>/<service>.yaml` — one file per service per environment; no shared file for dev and prod.
+- **Derive assertions**: `scripts/derive-assertions-from-response.ts` — input a JSON response file (or stdin), optional `--query <name>`, outputs YAML `assertions:` snippet. Use `--terraform` to get Terraform local value format.
+- **Tfvars**: `scripts/synthetic-test-config-to-tfvars.ts` — reads all `synthetic-test-config/graphql/<env>/*.yaml`, collects `synthetic_data[].key`/`value`, writes `environments/<env>/synthetic-test-config.auto.tfvars.json`. Run via `npm run tfvars:from-synthetic-test-config` (or `--env dev` / `--env prod`).
+
+## Summary
+
+**User gives**: Working GraphQL request + response.  
+**We update**: `synthetic-test-config/graphql/<env>/<service>.yaml` (input data from request, assertions from response).  
+**User runs**: `tfvars:from-synthetic-test-config` → `tf:plan:<env>` → `tf:apply:<env>` to sync Terraform and Datadog.

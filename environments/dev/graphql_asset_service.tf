@@ -32,6 +32,12 @@ locals {
 
   # 3. listMeasureUnits: [GqlMeasureUnit!]!
   graphql_body_list_measure_units = "{\"query\":\"query ListMeasureUnits {\\n  listMeasureUnits {\\n    name\\n    symbol\\n    type\\n    measureGroup\\n  }\\n}\"}"
+  list_measure_units_jsonpath_assertions = [
+    { jsonpath = "$.data.listMeasureUnits[0].name", operator = "is", targetvalue = "Litre" },
+    { jsonpath = "$.data.listMeasureUnits[0].symbol", operator = "is", targetvalue = "litre" },
+    { jsonpath = "$.data.listMeasureUnits[0].type", operator = "is", targetvalue = "VOLUME" },
+    { jsonpath = "$.data.listMeasureUnits[0].measureGroup", operator = "is", targetvalue = "METRIC" },
+  ]
 
   # 4. assetTemplates: [GqlAssetTemplate!]!
   graphql_body_asset_templates = "{\"query\":\"query AssetTemplates {\\n  assetTemplates {\\n    id\\n    name\\n    accountId\\n    parentId\\n    createdAt\\n    updatedAt\\n  }\\n}\"}"
@@ -303,7 +309,19 @@ resource "datadog_synthetics_test" "auth0_graphql_list_measure_units_dev" {
       operator = "is"
       target   = "200"
     }
-    # Add body assertions (e.g. $.data.listMeasureUnits[0].name) when tuning
+
+    dynamic "assertion" {
+      for_each = local.list_measure_units_jsonpath_assertions
+      content {
+        type     = "body"
+        operator = "validatesJSONPath"
+        targetjsonpath {
+          jsonpath    = assertion.value.jsonpath
+          operator    = assertion.value.operator
+          targetvalue = assertion.value.targetvalue
+        }
+      }
+    }
   }
 
   options_list {

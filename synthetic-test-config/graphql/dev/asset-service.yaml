@@ -57,7 +57,7 @@ queries:
 
   - name: listMeasureUnits
     synthetic_data: []
-    notes: Test only enabled in aws:ca-central-1 until tuned.
+    notes: Validates list of measure units (name, symbol, type, measureGroup). No request variables.
     implemented: true
     locations:
       - aws:ca-central-1
@@ -68,6 +68,19 @@ queries:
       - aws:sa-east-1
       - azure:eastus
       - gcp:us-east4
+    assertions:
+      - jsonpath: "$.data.listMeasureUnits[0].name"
+        operator: is
+        targetvalue: "Litre"
+      - jsonpath: "$.data.listMeasureUnits[0].symbol"
+        operator: is
+        targetvalue: "litre"
+      - jsonpath: "$.data.listMeasureUnits[0].type"
+        operator: is
+        targetvalue: "VOLUME"
+      - jsonpath: "$.data.listMeasureUnits[0].measureGroup"
+        operator: is
+        targetvalue: "METRIC"
 
   - name: assetTemplates
     synthetic_data: []
