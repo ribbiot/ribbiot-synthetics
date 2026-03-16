@@ -1,10 +1,21 @@
 # ------------------------------------------------------------------------------
 # GraphQL User Service tests (dev): Auth0 → GraphQL.
+# Note: "assertion.target is not valid for validatesJSONPath" warning is a known
+# provider bug (terraform-provider-datadog#3362); safe to ignore.
 # ------------------------------------------------------------------------------
 
 locals {
-  graphql_endpoint_user = "https://ribbiot-router-dev.up.railway.app/graphql"
-  graphql_body_user_system_check = "{\"query\":\"query UserSystemCheck($input: SystemCheckInput) {\\n  userSystemCheck(input: $input) {\\n    message\\n    environment\\n    featureFlags\\n    launchDarklyStatus\\n    sqlStatus\\n    minimumAndroidVersion\\n    minimumIOSVersion\\n  }\\n}\",\"variables\":{\"input\":{\"checkLaunchDarkly\":true,\"checkSQL\":true}}}"
+  graphql_endpoint_user           = "https://ribbiot-router-dev.up.railway.app/graphql"
+  graphql_body_user_system_check  = "{\"query\":\"query UserSystemCheck($input: SystemCheckInput) {\\n  userSystemCheck(input: $input) {\\n    message\\n    environment\\n    featureFlags\\n    launchDarklyStatus\\n    sqlStatus\\n    minimumAndroidVersion\\n    minimumIOSVersion\\n  }\\n}\",\"variables\":{\"input\":{\"checkLaunchDarkly\":true,\"checkSQL\":true}}}"
+
+  # validatesJSONPath assertions without assertion.target (provider warns if target is set)
+  user_system_check_jsonpath_assertions = [
+    { jsonpath = "$.data.userSystemCheck.message", operator = "is", targetvalue = "User Service is Running!" },
+    { jsonpath = "$.data.userSystemCheck.launchDarklyStatus", operator = "is", targetvalue = "OK" },
+    { jsonpath = "$.data.userSystemCheck.sqlStatus", operator = "is", targetvalue = "OK" },
+    { jsonpath = "$.data.userSystemCheck.minimumAndroidVersion", operator = "is", targetvalue = "0.0.2" },
+    { jsonpath = "$.data.userSystemCheck.minimumIOSVersion", operator = "is", targetvalue = "1.1.18" },
+  ]
 }
 
 resource "datadog_synthetics_test" "auth0_graphql_user_system_check_dev" {
@@ -90,58 +101,16 @@ resource "datadog_synthetics_test" "auth0_graphql_user_system_check_dev" {
       target   = "200"
     }
 
-    assertion {
-      type     = "body"
-      operator = "validatesJSONPath"
-      target   = null
-      targetjsonpath {
-        jsonpath    = "$.data.userSystemCheck.message"
-        operator    = "is"
-        targetvalue = "User Service is Running!"
-      }
-    }
-
-    assertion {
-      type     = "body"
-      operator = "validatesJSONPath"
-      target   = null
-      targetjsonpath {
-        jsonpath    = "$.data.userSystemCheck.launchDarklyStatus"
-        operator    = "is"
-        targetvalue = "OK"
-      }
-    }
-
-    assertion {
-      type     = "body"
-      operator = "validatesJSONPath"
-      target   = null
-      targetjsonpath {
-        jsonpath    = "$.data.userSystemCheck.sqlStatus"
-        operator    = "is"
-        targetvalue = "OK"
-      }
-    }
-
-    assertion {
-      type     = "body"
-      operator = "validatesJSONPath"
-      target   = null
-      targetjsonpath {
-        jsonpath    = "$.data.userSystemCheck.minimumAndroidVersion"
-        operator    = "is"
-        targetvalue = "0.0.2"
-      }
-    }
-
-    assertion {
-      type     = "body"
-      operator = "validatesJSONPath"
-      target   = null
-      targetjsonpath {
-        jsonpath    = "$.data.userSystemCheck.minimumIOSVersion"
-        operator    = "is"
-        targetvalue = "1.1.18"
+    dynamic "assertion" {
+      for_each = local.user_system_check_jsonpath_assertions
+      content {
+        type     = "body"
+        operator = "validatesJSONPath"
+        targetjsonpath {
+          jsonpath    = assertion.value.jsonpath
+          operator    = assertion.value.operator
+          targetvalue = assertion.value.targetvalue
+        }
       }
     }
   }

@@ -1,10 +1,19 @@
 # ------------------------------------------------------------------------------
 # GraphQL Job Service tests (dev): Auth0 → GraphQL.
+# Note: "assertion.target is not valid for validatesJSONPath" warning is a known
+# provider bug (terraform-provider-datadog#3362); safe to ignore.
 # ------------------------------------------------------------------------------
 
 locals {
-  graphql_endpoint_job = "https://ribbiot-router-dev.up.railway.app/graphql"
+  graphql_endpoint_job          = "https://ribbiot-router-dev.up.railway.app/graphql"
   graphql_body_job_system_check = "{\"query\":\"query JobSystemCheck($input: SystemCheckInput) {\\n  jobSystemCheck(input: $input) {\\n    message\\n    environment\\n    featureFlags\\n    launchDarklyStatus\\n    sqlStatus\\n  }\\n}\",\"variables\":{\"input\":{\"checkLaunchDarkly\":true,\"checkSQL\":true}}}"
+
+  # validatesJSONPath assertions without assertion.target (provider warns if target is set)
+  job_system_check_jsonpath_assertions = [
+    { jsonpath = "$.data.jobSystemCheck.message", operator = "is", targetvalue = "Job Service is Running!" },
+    { jsonpath = "$.data.jobSystemCheck.launchDarklyStatus", operator = "is", targetvalue = "OK" },
+    { jsonpath = "$.data.jobSystemCheck.sqlStatus", operator = "is", targetvalue = "OK" },
+  ]
 }
 
 resource "datadog_synthetics_test" "auth0_graphql_job_system_check_dev" {
@@ -90,36 +99,16 @@ resource "datadog_synthetics_test" "auth0_graphql_job_system_check_dev" {
       target   = "200"
     }
 
-    assertion {
-      type     = "body"
-      operator = "validatesJSONPath"
-      target   = null
-      targetjsonpath {
-        jsonpath    = "$.data.jobSystemCheck.message"
-        operator    = "is"
-        targetvalue = "Job Service is Running!"
-      }
-    }
-
-    assertion {
-      type     = "body"
-      operator = "validatesJSONPath"
-      target   = null
-      targetjsonpath {
-        jsonpath    = "$.data.jobSystemCheck.launchDarklyStatus"
-        operator    = "is"
-        targetvalue = "OK"
-      }
-    }
-
-    assertion {
-      type     = "body"
-      operator = "validatesJSONPath"
-      target   = null
-      targetjsonpath {
-        jsonpath    = "$.data.jobSystemCheck.sqlStatus"
-        operator    = "is"
-        targetvalue = "OK"
+    dynamic "assertion" {
+      for_each = local.job_system_check_jsonpath_assertions
+      content {
+        type     = "body"
+        operator = "validatesJSONPath"
+        targetjsonpath {
+          jsonpath    = assertion.value.jsonpath
+          operator    = assertion.value.operator
+          targetvalue = assertion.value.targetvalue
+        }
       }
     }
   }

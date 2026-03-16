@@ -1,5 +1,7 @@
 # ------------------------------------------------------------------------------
 # GraphQL Asset Service tests (dev): Auth0 → GraphQL.
+# Note: "assertion.target is not valid for validatesJSONPath" warning is a known
+# provider bug (terraform-provider-datadog#3362); safe to ignore.
 # First 3 queries: assetSystemCheck, getAssetImportUploadPresignedUrl, listMeasureUnits.
 # New queries (getAssetImportUploadPresignedUrl, listMeasureUnits) are not enabled in any
 # geos initially; set locations and dev_asset_account_id when tuning is done.
@@ -16,6 +18,13 @@ locals {
 
   # 1. assetSystemCheck(input: SystemCheckInput): GqlAssetSystemCheck!
   graphql_body_asset_system_check = "{\"query\":\"query AssetSystemCheck($input: SystemCheckInput) {\\n  assetSystemCheck(input: $input) {\\n    message\\n    environment\\n    featureFlags\\n    launchDarklyStatus\\n    sqlStatus\\n  }\\n}\",\"variables\":{\"input\":{\"checkLaunchDarkly\":true,\"checkSQL\":true}}}"
+
+  # validatesJSONPath assertions without assertion.target (provider warns if target is set)
+  asset_system_check_jsonpath_assertions = [
+    { jsonpath = "$.data.assetSystemCheck.message", operator = "is", targetvalue = "Asset Service is Running!" },
+    { jsonpath = "$.data.assetSystemCheck.launchDarklyStatus", operator = "is", targetvalue = "OK" },
+    { jsonpath = "$.data.assetSystemCheck.sqlStatus", operator = "is", targetvalue = "OK" },
+  ]
 
   # 2. getAssetImportUploadPresignedUrl(accountId: ID!): String!
   # Uses DEV_ASSET_ACCOUNT_ID; set dev_asset_account_id when enabling this test.
@@ -112,36 +121,16 @@ resource "datadog_synthetics_test" "auth0_graphql_asset_system_check_dev" {
       target   = "200"
     }
 
-    assertion {
-      type     = "body"
-      operator = "validatesJSONPath"
-      target   = null
-      targetjsonpath {
-        jsonpath    = "$.data.assetSystemCheck.message"
-        operator    = "is"
-        targetvalue = "Asset Service is Running!"
-      }
-    }
-
-    assertion {
-      type     = "body"
-      operator = "validatesJSONPath"
-      target   = null
-      targetjsonpath {
-        jsonpath    = "$.data.assetSystemCheck.launchDarklyStatus"
-        operator    = "is"
-        targetvalue = "OK"
-      }
-    }
-
-    assertion {
-      type     = "body"
-      operator = "validatesJSONPath"
-      target   = null
-      targetjsonpath {
-        jsonpath    = "$.data.assetSystemCheck.sqlStatus"
-        operator    = "is"
-        targetvalue = "OK"
+    dynamic "assertion" {
+      for_each = local.asset_system_check_jsonpath_assertions
+      content {
+        type     = "body"
+        operator = "validatesJSONPath"
+        targetjsonpath {
+          jsonpath    = assertion.value.jsonpath
+          operator    = assertion.value.operator
+          targetvalue = assertion.value.targetvalue
+        }
       }
     }
   }

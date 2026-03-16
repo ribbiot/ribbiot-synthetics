@@ -1,6 +1,6 @@
 # ------------------------------------------------------------------------------
 # Prod environment: Datadog provider and synthetic API tests.
-# Credentials via env: DD_API_KEY, DD_APP_KEY. Optional: DD_API_URL (Datadog site).
+# Credentials via env: TF_VAR_dd_api_key, TF_VAR_dd_app_key. Optional: DD_API_URL (Datadog site).
 # ------------------------------------------------------------------------------
 
 terraform {
@@ -18,9 +18,8 @@ terraform {
 }
 
 provider "datadog" {
-  # Prefer TF_VAR_*; if empty, use DD_API_KEY / DD_APP_KEY (so .env with DD_* works after sourcing).
-  api_key = var.dd_api_key != "" ? var.dd_api_key : try(env("DD_API_KEY"), "")
-  app_key = var.dd_app_key != "" ? var.dd_app_key : try(env("DD_APP_KEY"), "")
+  api_key = var.dd_api_key
+  app_key = var.dd_app_key
   api_url = try(env("DD_API_URL"), "") != "" ? env("DD_API_URL") : var.dd_api_url
 }
 

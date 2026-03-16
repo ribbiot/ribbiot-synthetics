@@ -12,6 +12,7 @@ This repository defines and manages **Datadog Synthetic API tests** using Terraf
 
 ## Prerequisites
 
+- [Node.js](https://nodejs.org/) (v18+) and npm — for `npm run` scripts (branch creation, Terraform helpers)
 - [Terraform](https://www.terraform.io/downloads) >= 1.0
 - A [Datadog](https://www.datadoghq.com/) account with API and Application keys that can create and manage synthetics
 
@@ -21,8 +22,8 @@ Set these before running Terraform (or use a non-committed `terraform.tfvars` fi
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `TF_VAR_dd_api_key` or `DD_API_KEY` | Datadog API key | (from Datadog Organization Settings → API Keys) |
-| `TF_VAR_dd_app_key` or `DD_APP_KEY` | Datadog Application key | (from Datadog Organization Settings → Application Keys) |
+| `TF_VAR_dd_api_key` | Datadog API key | (from Datadog Organization Settings → API Keys) |
+| `TF_VAR_dd_app_key` | Datadog Application key | (from Datadog Organization Settings → Application Keys) |
 
 Optional:
 
@@ -40,12 +41,21 @@ Optional:
 
 **Never commit** `terraform.tfvars` or any file containing real API/app keys or Auth0 credentials. Use `terraform.tfvars.example` as a template only.
 
+For npm scripts, put these variables in a `.env` file at the repo root (copy from `.env.example`). The `tf:*` scripts load `.env` automatically.
+
 ## Repository Structure
 
 ```
 .
 ├── README.md
+├── .env.example
 ├── .gitignore
+├── package.json
+├── tsconfig.json
+├── scripts/
+│   ├── new-branch.ts      # Create a new branch from main
+│   ├── new-branch.test.ts
+│   └── terraform.ts       # Run Terraform with .env (init/plan/apply/validate)
 ├── modules/
 │   └── synthetic-api-test/    # Reusable module for one API synthetic test
 │       ├── main.tf
@@ -70,42 +80,69 @@ Optional:
 - **Module**: `modules/synthetic-api-test` exposes inputs (name, URL, method, headers, assertions, locations, frequency, tags, status, message, etc.) and creates a single `datadog_synthetics_test` API test.
 - **Multi-step tests**: Use `datadog_synthetics_test` with `subtype = "multi"` and multiple `api_step` blocks (e.g. Auth0 token then GraphQL). See `environments/dev/graphql.tf` and `.cursor/rules/datadog-graphql-synthetics.mdc` for implementation-derived instructions and how to add more GraphQL queries.
 
+## NPM Scripts (Node.js / TypeScript)
+
+From the repo root, after `npm install`:
+
+| Script | Description |
+|--------|-------------|
+| `npm run new-branch [name]` | Create and checkout a new branch from `main`. If `name` is omitted, you’re prompted. Use e.g. `LINEAR-123-feature-name`. |
+| `npm test` | Run tests (e.g. `scripts/new-branch.test.ts`). |
+| `npm run tf:init:dev` / `tf:init:prod` | Run `terraform init` in that environment (loads `.env`). |
+| `npm run tf:plan:dev` / `tf:plan:prod` | Run `terraform plan` (loads `.env`). |
+| `npm run tf:apply:dev` / `tf:apply:prod` | Run `terraform init` then `terraform apply -auto-approve` (loads `.env`). |
+| `npm run tf:validate:dev` / `tf:validate:prod` | Run `terraform validate` (loads `.env`). |
+
+Ensure a `.env` file exists (copy from `.env.example`) with `TF_VAR_*` and any other variables Terraform needs. All `tf:*` commands load `.env` automatically via `dotenv-cli`.
+
+Alternative: run the Terraform script directly with `npx ts-node scripts/terraform.ts <init|plan|apply|validate> <dev|prod>`; it loads `.env` and runs Terraform in the chosen environment.
+
 ## Quick Start
 
-### 1. Initialize Terraform
-
-From the repo root, initialize the environment you want to use (e.g. dev):
+### 1. Install dependencies and set up environment
 
 ```bash
+npm install
+cp .env.example .env
+# Edit .env with your Datadog API key, app key, and any Auth0/dev credentials.
+```
+
+### 2. Initialize Terraform
+
+From the repo root you can use npm (recommended) or run Terraform manually:
+
+```bash
+# Using npm (loads .env automatically)
+npm run tf:init:dev
+
+# Or manually
 cd environments/dev
 terraform init
 ```
 
-### 2. Plan Changes
-
-Provide credentials via environment variables (or tfvars), then plan:
+### 3. Plan Changes
 
 ```bash
-export TF_VAR_dd_api_key="your-api-key"
-export TF_VAR_dd_app_key="your-app-key"
-# Optional: export TF_VAR_dd_api_url="https://api.datadoghq.eu"
+# Using npm (loads .env)
+npm run tf:plan:dev
 
-terraform plan
+# Or manually: set TF_VAR_* then run terraform plan in environments/dev
 ```
 
 Review the plan to see which synthetic tests will be created or updated.
 
-### 3. Apply Changes
+### 4. Apply Changes
 
 When the plan looks correct:
 
 ```bash
-terraform apply
+# Using npm (loads .env, runs init + apply -auto-approve)
+npm run tf:apply:dev
+
+# Or manually: terraform apply (confirm with yes or use -auto-approve)
 ```
 
-Confirm with `yes` (or use `-auto-approve` in automation only).
-
-### 4. Using a tfvars File (Optional)
+### 5. Using a tfvars File (Optional)
 
 Copy the example and edit locally (do not commit the copy):
 
@@ -167,7 +204,7 @@ The module supports: `name`, `request_url`, `request_method`, `request_headers`,
 
 - **Per-environment**: Run Terraform from the correct environment directory (`environments/dev` or `environments/prod`). Use separate state (e.g. different S3 backend keys or workspaces) per environment.
 
-- **Credentials in CI**: Store `DD_API_KEY` and `DD_APP_KEY` (or `TF_VAR_dd_api_key` / `TF_VAR_dd_app_key`) as secrets in your CI system. Set `TF_VAR_dd_api_url` if you use a non-US1 site.
+- **Credentials in CI**: Store `TF_VAR_dd_api_key` and `TF_VAR_dd_app_key` as secrets in your CI system. Set `TF_VAR_dd_api_url` if you use a non-US1 site.
 
 - **Typical pipeline**:
   1. **On PR**: Run `terraform init`, `terraform validate`, `terraform plan` and (optionally) post the plan as a comment.

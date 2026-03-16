@@ -1,10 +1,19 @@
 # ------------------------------------------------------------------------------
 # GraphQL Timecard Service tests (dev): Auth0 → GraphQL.
+# Note: "assertion.target is not valid for validatesJSONPath" warning is a known
+# provider bug (terraform-provider-datadog#3362); safe to ignore.
 # ------------------------------------------------------------------------------
 
 locals {
-  graphql_endpoint_timecard = "https://ribbiot-router-dev.up.railway.app/graphql"
+  graphql_endpoint_timecard         = "https://ribbiot-router-dev.up.railway.app/graphql"
   graphql_body_timecard_system_check = "{\"query\":\"query TimecardSystemCheck($input: SystemCheckInput) {\\n  timecardSystemCheck(input: $input) {\\n    message\\n    environment\\n    featureFlags\\n    launchDarklyStatus\\n    sqlStatus\\n  }\\n}\",\"variables\":{\"input\":{\"checkLaunchDarkly\":true,\"checkSQL\":true}}}"
+
+  # validatesJSONPath assertions without assertion.target (provider warns if target is set)
+  timecard_system_check_jsonpath_assertions = [
+    { jsonpath = "$.data.timecardSystemCheck.message", operator = "is", targetvalue = "Timecard system is up and running!" },
+    { jsonpath = "$.data.timecardSystemCheck.launchDarklyStatus", operator = "is", targetvalue = "OK" },
+    { jsonpath = "$.data.timecardSystemCheck.sqlStatus", operator = "is", targetvalue = "OK" },
+  ]
 }
 
 resource "datadog_synthetics_test" "auth0_graphql_timecard_system_check_dev" {
@@ -90,36 +99,16 @@ resource "datadog_synthetics_test" "auth0_graphql_timecard_system_check_dev" {
       target   = "200"
     }
 
-    assertion {
-      type     = "body"
-      operator = "validatesJSONPath"
-      target   = null
-      targetjsonpath {
-        jsonpath    = "$.data.timecardSystemCheck.message"
-        operator    = "is"
-        targetvalue = "Timecard system is up and running!"
-      }
-    }
-
-    assertion {
-      type     = "body"
-      operator = "validatesJSONPath"
-      target   = null
-      targetjsonpath {
-        jsonpath    = "$.data.timecardSystemCheck.launchDarklyStatus"
-        operator    = "is"
-        targetvalue = "OK"
-      }
-    }
-
-    assertion {
-      type     = "body"
-      operator = "validatesJSONPath"
-      target   = null
-      targetjsonpath {
-        jsonpath    = "$.data.timecardSystemCheck.sqlStatus"
-        operator    = "is"
-        targetvalue = "OK"
+    dynamic "assertion" {
+      for_each = local.timecard_system_check_jsonpath_assertions
+      content {
+        type     = "body"
+        operator = "validatesJSONPath"
+        targetjsonpath {
+          jsonpath    = assertion.value.jsonpath
+          operator    = assertion.value.operator
+          targetvalue = assertion.value.targetvalue
+        }
       }
     }
   }
