@@ -1,0 +1,30 @@
+# Same as apollo-mcp.yaml but sends Bearer token from AUTH0_ACCESS_TOKEN (DEV ONLY).
+# Use with: npm run mcp:start:auth. Do not use with production. See docs/dev-only-scope.md.
+
+endpoint: ${env.APOLLO_GRAPHQL_ENDPOINT:-https://ribbiot-router-dev.up.railway.app/graphql}
+
+# Local schema so we don't need GraphOS (APOLLO_GRAPH_REF). Run npm run mcp:schema to refresh.
+schema:
+  source: local
+  path: /data/schema.graphql
+
+transport:
+  type: streamable_http
+
+headers:
+  Authorization: Bearer ${env.AUTH0_ACCESS_TOKEN}
+
+introspection:
+  execute:
+    enabled: true
+  introspect:
+    enabled: true
+    minify: true
+  search:
+    enabled: true
+    minify: true
+  validate:
+    enabled: true
+
+operations:
+  source: introspect

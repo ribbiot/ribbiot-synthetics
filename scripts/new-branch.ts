@@ -12,9 +12,13 @@
  */
 
 import { execSync, spawnSync } from 'node:child_process'
+import { config as loadEnv } from 'dotenv'
 import inquirer from 'inquirer'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
+
+// Load .env so LINEAR_API_KEY is available for the Linear CLI subprocess
+loadEnv()
 
 const LINEAR_TICKET_PATTERN = /^[A-Za-z]+-\d+$/
 const BRANCH_TYPES = ['task', 'feature', 'bugfix', 'misc'] as const
@@ -71,21 +75,11 @@ export function resolveBranchName(
 
 function getIssueTitleFromLinearCli(ticket: string): string | null {
   try {
+    // Deno inherits process.env (LINEAR_API_KEY loaded from .env via dotenv above)
     const r = spawnSync(
-      'npx',
-      [
-        'dotenvx',
-        'run',
-        '--',
-        'deno',
-        'run',
-        '-A',
-        'jsr:@schpet/linear-cli',
-        'issue',
-        'view',
-        ticket,
-      ],
-      { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }
+      'deno',
+      ['run', '-A', 'jsr:@schpet/linear-cli', 'issue', 'view', ticket],
+      { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], env: process.env }
     )
     const out = (r.stdout ?? '').trim()
     const err = (r.stderr ?? '').trim()

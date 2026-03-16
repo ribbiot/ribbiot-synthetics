@@ -33,3 +33,6 @@ dist/
 
 # Plan output (optional; some teams commit for review)
 # *.plan
+
+# MCP: per-developer schema selection (run npm run mcp:select-schema to create)
+config/selected-schema.json

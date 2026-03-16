@@ -1,0 +1,9 @@
+# Synthetic data for Timecard service (Dev-TimecardService).
+# Which query uses which data; where to set values (Terraform / globals).
+
+service: Timecard service
+graph: Dev-TimecardService
+terraform_file: environments/dev/graphql_timecard_service.tf
+
+queries: []
+# Add entries as you implement query synthetics (e.g. timecardSystemCheck, etc.).

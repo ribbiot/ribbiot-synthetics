@@ -1,0 +1,38 @@
+# Apollo MCP Server config for ribbiot-synthetics (DEV ONLY).
+# Used so Cursor can introspect our GraphQL schema and run queries (see docs/apollo-mcp-cursor.md).
+# Do not point at production. See docs/dev-only-scope.md.
+#
+# Override the GraphQL endpoint via env (optional; dev endpoints only):
+#   APOLLO_GRAPHQL_ENDPOINT  - or use APOLLO_MCP_ENDPOINT (takes precedence)
+
+endpoint: ${env.APOLLO_GRAPHQL_ENDPOINT:-https://ribbiot-router-dev.up.railway.app/graphql}
+
+# Local schema so we don't need GraphOS (APOLLO_GRAPH_REF). Run npm run mcp:schema to refresh.
+schema:
+  source: local
+  path: /data/schema.graphql
+
+transport:
+  type: streamable_http
+# Optional: bind host/port (defaults often work for local dev)
+# transport:
+#   type: streamable_http
+#   port: 8000
+#   host: 0.0.0.0
+
+# Enable introspection tools so Cursor can get schema and execute queries.
+introspection:
+  execute:
+    enabled: true
+  introspect:
+    enabled: true
+    minify: true
+  search:
+    enabled: true
+    minify: true
+  validate:
+    enabled: true
+
+# Derive operations from schema introspection (no fixed .graphql files required).
+operations:
+  source: introspect

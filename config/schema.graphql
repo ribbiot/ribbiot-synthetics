@@ -1,0 +1,2419 @@
+directive @defer(label: String, if: Boolean! = true) on FRAGMENT_SPREAD | INLINE_FRAGMENT
+
+"""Federation scalar for field sets"""
+scalar _FieldSet
+
+input AddressInput {
+  name: String
+  formattedAddress: String
+  lat: Float
+  lng: Float
+}
+
+input AvailableAssetScheduleForTaskInput {
+  startDate: Date!
+  endDate: Date
+  timezone: String
+  searchTerm: String
+  assetType: String
+  divisionId: ID
+  branchId: ID
+  excludedComplexJobId: ID
+  nextPageKey: ID
+  pageInfo: PageInfoInput
+}
+
+input AvailableAssetScheduleInput {
+  startDate: Date!
+  endDate: Date
+  timezone: String
+  searchTerm: String
+  assetType: String
+  divisionId: ID
+  branchId: ID
+  excludedComplexJobId: ID
+  nextPageKey: ID
+  pageInfo: PageInfoInput
+}
+
+enum BillingFrequency {
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+  END_OF_MONTH
+  JOB_END
+}
+
+input CancelComplexInvoiceInput {
+  id: ID!
+  accountId: ID
+}
+
+type ColorResponse {
+  """Similar to HTTP status code, represents the status of the mutation"""
+  code: Int!
+
+  """Indicates whether the mutation was successful"""
+  success: Boolean!
+
+  """Human-readable message for the UI"""
+  message: String!
+
+  """The affected color object"""
+  color: GqlColor
+}
+
+type ComplexInvoiceResponse {
+  code: Int!
+  success: Boolean!
+  message: String!
+  invoice: GqlComplexInvoice
+}
+
+input ComplexJobInput {
+  id: ID!
+}
+
+type ComplexJobResponse {
+  code: Int!
+  success: Boolean!
+  message: String!
+  job: GqlComplexJob
+}
+
+enum ComplexJobStatusEnum {
+  SCHEDULED
+  OPPORTUNITY
+  ONGOING
+  COMPLETE
+}
+
+enum ComplexJobTypeEnum {
+  OPERATIONS
+  WAREHOUSE
+  RENTAL
+  MAINTENANCE
+  TRANSPORT
+}
+
+type ComplexTaskEntryResponse {
+  code: Int!
+  success: Boolean!
+  message: String!
+  entries: [GqlComplexTaskEntry!]
+}
+
+type ComplexTaskResponse {
+  code: Int!
+  success: Boolean!
+  message: String!
+  task: GqlComplexTask
+}
+
+enum ComplexTaskStatusEnum {
+  SCHEDULED
+  OPPORTUNITY
+  ONGOING
+  COMPLETE
+}
+
+enum ComplexTaskTypeEnum {
+  OPERATIONS
+  STORAGE
+  RENTAL
+  MAINTENANCE
+  TRANSPORT
+}
+
+input CreateAssetInput {
+  name: String!
+  divisionId: String
+  branchId: String
+  assetTemplateId: String!
+  source: String!
+  notes: String
+  needsReview: Boolean
+  metadata: [GqlAssetMetadataInput!]!
+}
+
+input CreateAssetTemplateInput {
+  name: String!
+  parentId: String
+  metadataSchema: JSON!
+}
+
+input CreateColorInput {
+  accountId: String
+  name: String!
+  code: String!
+}
+
+input CreateComplexInvoiceInput {
+  accountId: ID
+  cycleStartDate: Date!
+  cycleEndDate: Date!
+  complexJobId: ID!
+  formSubmissionId: ID!
+  status: InvoiceStatus!
+  amountCents: Int
+}
+
+input CreateComplexJobInput {
+  id: ID
+  accountId: ID
+  isActive: Boolean
+  name: String!
+  jobType: String
+  startDate: DateTime
+  endDate: DateTime
+  divisionIds: [ID!]
+  branchIds: [ID!]
+  projectOwner: String
+  location: LocationInput
+  salesPerson: String
+  number: String
+  notes: String
+  status: ComplexJobStatusEnum
+  colorId: ID
+  complexTasks: [CreateNestedComplexTaskInput!]
+  quoteId: ID
+  quotedCostCents: Int
+  isReadyForInvoice: Boolean
+  billingFrequency: BillingFrequency
+  customerAccountId: ID
+  customerContactId: ID
+  siteContact: String
+  siteContactPhone: String
+}
+
+input CreateComplexTaskEntryInput {
+  accountId: ID
+  complexTaskId: ID!
+  entryDate: Date!
+  startTime: Time
+  endTime: Time
+  timezone: String
+  assetIds: [ID!]
+  userIds: [ID!]
+}
+
+input CreateComplexTaskInput {
+  isActive: Boolean
+  accountId: ID
+  jobId: ID!
+  taskType: String!
+  name: String
+  startDate: DateTime
+  endDate: DateTime
+  startTime: Time
+  endTime: Time
+  timezone: String
+  rrule: String
+  status: String
+  location: LocationInput
+  divisionId: ID
+  branchId: ID
+  notes: String
+  userIds: [ID!]
+  assetIds: [ID!]
+  colorId: ID
+}
+
+input CreateFormTypeAccountInput {
+  formTypeSlug: String!
+  formTypeDisplayName: String!
+  accountId: String!
+  divisionIds: [String]
+  branchIds: [String]
+  iconUrl: String
+  ordinal: Int
+}
+
+input CreateFormTypeInput {
+  slug: String!
+  displayName: String!
+  description: String
+  iconUrl: String
+  isGlobal: Boolean!
+}
+
+input CreateJobDocumentInput {
+  jobId: ID
+  complexJobId: ID
+  name: String!
+  url: String!
+  sizeBytes: Int!
+  thumbnailUrl: String
+  contentType: String!
+  active: Boolean = true
+  isMobileViewable: Boolean = false
+  expiresAt: DateTime
+  version: String
+}
+
+input CreateJobInput {
+  name: String!
+  startDate: Date!
+  endDate: Date
+  divisionId: String
+  branchId: String
+  address: AddressInput
+  customer: CustomerInput
+  number: String
+  notes: String
+  status: String = "scheduled"
+  projectOwner: [String!]
+  salesPerson: [String!]
+  tasks: [CreateTaskInput!]
+  crew: [String!]
+  assets: [String!]
+  jobType: String = "OPERATIONS"
+  colorId: String
+  billingFrequency: BillingFrequency = JOB_END
+  quoteId: String
+  quotedCostCents: Int
+}
+
+input CreateNestedComplexTaskInput {
+  isActive: Boolean
+  taskType: String!
+  name: String
+  startDate: DateTime
+  endDate: DateTime
+  startTime: Time
+  endTime: Time
+  timezone: String
+  rrule: String
+  status: String
+  location: LocationInput
+  divisionId: ID
+  branchId: ID
+  notes: String
+  userIds: [ID!]
+  assetIds: [ID!]
+  colorId: ID
+}
+
+input CreatePriceBookItemInput {
+  accountId: String
+  divisionIds: [String!]
+  branchIds: [String!]
+  name: String!
+  description: String
+  rate: Float!
+  unit: String!
+  defaultValue: Float
+  notes: String
+  category: String
+  status: String = "active"
+  active: Boolean = true
+}
+
+input CreateTaskInput {
+  date: Date!
+  assets: [String!]
+  crew: [String!]
+}
+
+input CustomerInput {
+  name: String
+  email: String
+  phone: String
+  type: String
+  contactName: String
+  siteContact: String
+  siteContactPhone: String
+}
+
+enum CustomerTypeEnum {
+  individual
+  company
+}
+
+scalar Date
+
+scalar DateTime
+
+type DeleteColorResponse {
+  """Similar to HTTP status code, represents the status of the mutation"""
+  code: Int!
+
+  """Indicates whether the mutation was successful"""
+  success: Boolean!
+
+  """Human-readable message for the UI"""
+  message: String!
+}
+
+type DeleteComplexJobResponse {
+  code: Int!
+  success: Boolean!
+  message: String!
+}
+
+type DeleteComplexTaskResponse {
+  code: Int!
+  success: Boolean!
+  message: String!
+}
+
+type DeleteJobDocumentResponse {
+  """Similar to HTTP status code, represents the status of the mutation"""
+  code: Int!
+
+  """Indicates whether the mutation was successful"""
+  success: Boolean!
+
+  """Human-readable message for the UI"""
+  message: String!
+}
+
+type DeletePriceBookItemResponse {
+  """Similar to HTTP status code, represents the status of the mutation"""
+  code: Int!
+
+  """Indicates whether the mutation was successful"""
+  success: Boolean!
+
+  """Human-readable message for the UI"""
+  message: String!
+}
+
+input ExactMatchInput {
+  id: String!
+  value: String!
+}
+
+type FormFieldAttributeRuleHook implements FormRuleHook {
+  ruleName: String!
+  hookName: String!
+  dependsOnHooks: [String!]
+  attribute: String!
+}
+
+input FormFieldAttributeRuleHookInput {
+  ruleName: String!
+  hookName: String!
+  dependsOnHooks: [String!] = []
+  attribute: String!
+}
+
+type FormFieldValueRuleHook implements FormRuleHook {
+  ruleName: String!
+  hookName: String!
+  dependsOnHooks: [String!]
+  fieldId: String
+}
+
+input FormFieldValueRuleHookInput {
+  ruleName: String!
+  hookName: String!
+  dependsOnHooks: [String!] = []
+
+  """
+  fieldId is optional, assumes the fieldId of the field the ruleHook is attached to if not provided
+  """
+  fieldId: String
+}
+
+enum FormIconType {
+  TIMECARD
+  SAFETY
+  INSPECTION
+  INCIDENT
+  ATTENDANCE
+  UNKNOWN
+}
+
+enum FormPDFConfigFieldFormat {
+  DATE
+  BOOLEAN
+  STRING
+  USER_ID
+  BRANCH_ID
+  OCCUPATION_ID
+  CREW_MEMBERS
+  FORM_SUBMISSION_ID
+  QUOTE_DETAILS
+  NUMBER
+  CLOCK_TIME_INPUT
+  CUSTOMER_FIELDS
+}
+
+interface FormRuleHook {
+  ruleName: String!
+  hookName: String!
+  dependsOnHooks: [String!]
+}
+
+input FormRuleHookInput {
+  formFieldAttributeRuleHook: FormFieldAttributeRuleHookInput
+  formFieldValueRuleHook: FormFieldValueRuleHookInput
+}
+
+union FormRuleHookUnion = FormFieldAttributeRuleHook | FormFieldValueRuleHook
+
+input FormSubmissionDataInput {
+  status: String
+}
+
+enum FormSubmissionExportFileType {
+  PDF
+  CSV
+}
+
+input FormSubmissionSearchFilterInput {
+  startDate: DateTime!
+  endDate: DateTime!
+  nextPageKey: String
+  order: OrderEnum
+  orderField: String
+  limit: Int
+  formNumber: String
+  jobNumber: String
+  jobId: ID
+  userId: String
+  isLocal: Boolean
+  status: String
+  isArchived: Boolean
+  fullTextSearch: [FullTextSearchInput]
+  exactMatch: [ExactMatchInput]
+  hasData: [String]
+}
+
+type FormTemplateRule {
+  name: String!
+  rule: JSONLogic!
+}
+
+input FormTemplateRuleInput {
+  name: String!
+  rule: JSONLogic!
+}
+
+input FullTextSearchInput {
+  id: String!
+  value: String!
+}
+
+type GqlAddress {
+  name: String
+  formattedAddress: String
+  lat: Float
+  lng: Float
+}
+
+type GqlAsset {
+  id: ID!
+  name: String!
+  accountId: ID!
+  divisionId: ID
+  branchId: ID
+  active: Boolean!
+  source: String!
+  notes: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  metadata: [GqlAssetMetadataGroupedBySection!]!
+  updatedBy: String
+  needsReview: Boolean
+}
+
+type GqlAssetAddress {
+  lat: String!
+  lng: String!
+  formattedAddress: String
+  name: String
+}
+
+type GqlAssetAttachment {
+  id: ID!
+  url: String!
+  contentType: String!
+  primary: Boolean!
+  name: String!
+  createdAt: DateTime
+}
+
+type GqlAssetAvailability {
+  asset: GqlAssetAvailabilityAsset!
+  details: [GqlAssetAvailabilityDetails!]!
+  block: [GqlAssetAvailabilityBlock!]!
+}
+
+type GqlAssetAvailabilityAsset {
+  id: ID!
+  accountId: ID!
+  divisionId: ID
+  assetName: String!
+  assetStatus: String
+  location: String
+  address: GqlAssetAddress
+  metadata: [GqlAssetMetadata!]!
+  attachments: [GqlAssetAttachment!]!
+  macAddress: String
+  branchIds: [ID!]
+  details: GqlAssetDetails
+  category: String
+  categoryId: ID
+  assetTrackers: [GqlAssetTracker!]!
+  assetTrackerSource: GqlAssetTracker
+  radius: Int
+  lastSeen: DateTime
+  engineHours: Int
+  engineHoursLastUpdate: DateTime
+}
+
+type GqlAssetAvailabilityBlock {
+  name: String
+  status: String
+  startDateTime: DateTime
+  endDateTime: DateTime
+  timezone: String @deprecated
+  jobs: [GqlJob!] @deprecated
+  complexJobs: [GqlComplexJob!]
+  complexTasks: [GqlComplexTask!]
+}
+
+type GqlAssetAvailabilityDetails {
+  job: GqlJob @deprecated
+  complexJob: GqlComplexJob
+  unavailableDates: [Date!]
+}
+
+type GqlAssetAvailabilityForTask {
+  asset: GqlAssetAvailabilityAsset!
+  taskDetails: [GqlAssetAvailabilityTaskDetails!]!
+  block: [GqlAssetAvailabilityBlock!]!
+}
+
+type GqlAssetAvailabilityTaskDetails {
+  complexTask: GqlComplexTask!
+  complexJob: GqlComplexJob!
+  unavailableDates: [Date!]!
+}
+
+type GqlAssetDetails {
+  serialNumber: String
+  assetType: String!
+  assetSubtype: String
+  assetName: String
+  manufacturer: String!
+  weight: Float
+  weightUnit: String
+  height: Float
+  heightUnit: String
+  length: Float
+  lengthUnit: String
+  width: Float
+  widthUnit: String
+  notes: String
+  trackerType: String
+  mountType: String
+  applicationMethod: String
+  imei: String
+}
+
+enum GqlAssetDisplayType {
+  BASE_FIELD
+  METADATA_FIELD
+  SECTION
+}
+
+type GqlAssetMetadata {
+  metadataName: String!
+  metadataUnitOfMeasure: String
+  metadataValue: String!
+}
+
+type GqlAssetMetadataFields {
+  key: String!
+  position: Int!
+  type: GqlAssetMetadataType!
+  value: String
+  unit: String
+}
+
+type GqlAssetMetadataGroupedBySection {
+  name: String!
+  position: Int!
+  fields: [GqlAssetMetadataFields!]!
+}
+
+input GqlAssetMetadataInput {
+  key: String!
+  value: String
+  unit: String
+}
+
+enum GqlAssetMetadataType {
+  STRING
+  NUMBER
+}
+
+type GqlAssetResponse {
+  code: Int!
+  success: Boolean!
+  message: String!
+  asset: GqlAsset
+}
+
+type GqlAssetSystemCheck {
+  message: String!
+  environment: JSON!
+  featureFlags: JSON
+  launchDarklyStatus: String
+  sqlStatus: String
+}
+
+type GqlAssetTemplate {
+  id: ID!
+  name: String!
+  accountId: ID!
+  parentId: String
+  metadataSchema: JSON
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type GqlAssetTemplateResponse {
+  code: Int!
+  success: Boolean!
+  message: String!
+  assetTemplate: GqlAssetTemplate
+}
+
+type GqlAssetTracker {
+  id: ID!
+  externalId: String!
+  serialNumber: String
+  macAddress: String
+  manufacturer: String!
+  model: String
+  fwVersion: String
+  hwVersion: String
+  trackerType: String
+  mountType: String
+  applicationMethod: String
+}
+
+type GqlAvailableAssetSchedule {
+  availability: [GqlAssetAvailability!]!
+  pageInfo: PageInfo!
+}
+
+type GqlAvailableAssetScheduleForTask {
+  availability: [GqlAssetAvailabilityForTask!]!
+  pageInfo: PageInfo!
+}
+
+type GqlBaseAssetTemplate {
+  id: ID!
+  name: String!
+  metadataSchema: JSON!
+}
+
+type GqlClockTime {
+  dateTime: DateTime!
+  lat: Float!
+  lng: Float!
+}
+
+type GqlClockTimesData {
+  clockInTimes: [GqlClockTime!]!
+  clockOutTimes: [GqlClockTime!]!
+  outTime: Int
+}
+
+type GqlColor {
+  id: ID!
+  accountId: String!
+  name: String!
+  code: String!
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+type GqlComplexInvoice {
+  id: ID!
+  formSubmissionId: ID!
+  accountId: ID!
+  cycleStartDate: Date!
+  cycleEndDate: Date!
+  status: InvoiceStatus!
+  job: GqlComplexJob!
+  amountCents: Int
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type GqlComplexJob {
+  id: ID!
+  accountId: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  isActive: Boolean!
+  name: String!
+  jobType: ComplexJobTypeEnum
+  status: ComplexJobStatusEnum
+  startDate: Date @deprecated(reason: "Use DateTime instead")
+  endDate: Date @deprecated(reason: "Use DateTime instead")
+  startDateTime: DateTime
+  earliestTaskTimezone: String
+  latestTaskTimezone: String
+  endDateTime: DateTime
+  divisionIds: [ID!]
+  branchIds: [ID!]
+  projectOwner: String
+  location: Location
+  salesPerson: String
+  number: String
+  notes: String
+  customer: GqlCustomer
+  tasks: [GqlComplexTask!]
+  documents: [GqlJobDocument!]
+  color: GqlColor
+  quoteId: ID
+  quotedCostCents: Int
+  isReadyForInvoice: Boolean
+  billingFrequency: BillingFrequency
+  invoices: [GqlComplexInvoice!]
+  customerAccountId: ID
+  customerContactId: ID
+  siteContact: String
+  siteContactPhone: String
+  formSubmissions: [GqlFormSubmission!]
+}
+
+type GqlComplexTask {
+  id: ID!
+  accountId: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  isActive: Boolean!
+  name: String!
+  job: GqlComplexJob
+  taskType: ComplexTaskTypeEnum
+  status: ComplexTaskStatusEnum
+  startDate: Date
+  endDate: Date
+  startTime: Time
+  endTime: Time
+  timezone: String
+  startDateTime: DateTime
+  endDateTime: DateTime
+  rrule: String
+  location: Location
+  divisionId: ID
+  branchId: ID
+  notes: String
+  userIds: [ID!]
+  assetIds: [ID!]
+  entries: [GqlComplexTaskEntry!]
+  color: GqlColor
+}
+
+type GqlComplexTaskEntry {
+  id: ID!
+  accountId: ID!
+  complexTaskId: ID!
+  entryDate: Date!
+  startTime: Time
+  endTime: Time
+  timezone: String
+  startDateTime: DateTime
+  endDateTime: DateTime
+  assetIds: [ID!]!
+  userIds: [ID!]!
+}
+
+input GqlCreateFormSubmissionInput {
+  userId: ID!
+  formId: ID!
+  version: String!
+
+  """
+  The localDateTime must be passed as a string, otherwise GraphQL will convert to UTC. We want to parse out a timezone offset ourselves.
+  """
+  localDateTime: String!
+  data: FormSubmissionDataInput
+  fields: [GqlFormSubmissionFieldInput!]!
+  jobId: ID
+  jobNumber: String
+  customerAccountId: ID
+  customerContactId: ID
+}
+
+input GqlCreateInvoiceInput {
+  formSubmission: GqlCreateFormSubmissionInput!
+  jobId: ID!
+  quoteId: ID
+  invoiceAmountCents: Int
+}
+
+type GqlCustomer {
+  name: String
+  email: String
+  phone: String
+  type: CustomerTypeEnum
+  contactName: String
+  siteContact: String
+  siteContactPhone: String
+}
+
+type GqlField {
+  """
+  The id defined in the formTemplate for this field. Stored as formFieldId in the database.
+  """
+  id: ID!
+
+  """
+  The raw JSON value for this field. When reading, use item and itemType instead for type safety.
+  """
+  value: JSON
+
+  """The type provided by the client, specifying the component type"""
+  type: String
+
+  """The structured value for this field."""
+  item: GqlFieldItem
+
+  """The type of the structured value for this field."""
+  itemType: GqlFieldItemType
+}
+
+type GqlFieldClockTimes {
+  clockTimes: GqlClockTimesData!
+}
+
+union GqlFieldItem = GqlFieldString | GqlFieldPhotos | GqlFieldUsers | GqlFieldQuotes | GqlFieldClockTimes
+
+enum GqlFieldItemType {
+  STRING
+  PHOTO
+  USER
+  QUOTE
+  CLOCK_TIMES
+}
+
+type GqlFieldPhoto {
+  url: String!
+  contentType: String!
+}
+
+type GqlFieldPhotos {
+  photos: [GqlFieldPhoto!]!
+}
+
+type GqlFieldQuote {
+  pricebookItemId: String!
+  quantity: String!
+  name: String!
+  rate: String
+  unit: String!
+  notes: String
+}
+
+type GqlFieldQuotes {
+  quotes: [GqlFieldQuote!]!
+}
+
+type GqlFieldString {
+  value: String!
+}
+
+type GqlFieldUser {
+  userId: String!
+  userName: String
+  occupationId: String
+}
+
+type GqlFieldUsers {
+  users: [GqlFieldUser!]!
+}
+
+"""@deprecated (reason: "Use GqlFieldItemType for more robust typing")"""
+enum GqlFormFieldValueTypeEnum {
+  STRING
+  NUMBER
+  BOOL
+  ARRAY
+}
+
+type GqlFormPDFConfig {
+  formId: String!
+  version: String!
+  condition: String
+  fields: [GqlFormPDFConfigField!]!
+  hbsTemplate: String!
+  cssTemplate: String
+}
+
+type GqlFormPDFConfigField {
+  fieldId: String!
+  label: String!
+  format: FormPDFConfigFieldFormat!
+  fields: [GqlFormPDFConfigField]
+}
+
+input GqlFormPDFConfigFieldInput {
+  fieldId: String!
+  label: String!
+  format: FormPDFConfigFieldFormat!
+  fields: [GqlFormPDFConfigFieldInput]
+}
+
+input GqlFormPDFConfigInput {
+  formId: String!
+  versionImpact: GqlFormPDFConfigVersionImpact!
+  fields: [GqlFormPDFConfigFieldInput!]!
+  condition: String
+  hbsTemplate: String!
+  cssTemplate: String
+}
+
+type GqlFormPDFConfigResponse {
+  code: Int!
+  success: Boolean!
+  message: String!
+  pdfConfig: GqlFormPDFConfig
+}
+
+enum GqlFormPDFConfigVersionImpact {
+  MAJOR
+  MINOR
+  PATCH
+}
+
+enum GqlFormStatusEnum {
+  NEW
+  ISSUE
+  APPROVED
+  PROCESSED
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+}
+
+type GqlFormSubmission {
+  id: ID!
+  accountId: ID!
+  formId: ID!
+  version: String!
+  userId: ID!
+  timezoneOffset: String
+  localDateTime: String!
+  fields: [GqlField!]!
+  data: GqlFormSubmissionData
+  submitDateTime: DateTime!
+  number: String
+  status: String @deprecated(reason: "Use new enum status once available")
+  adminNotes: String
+  lastChangeNotes: String
+  pdfFilePath: String
+  orderId: ID
+  edited: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  totalHours: String
+  hasFile: Boolean
+  jobId: ID
+  jobNumber: String
+  job: GqlComplexJob
+  customerAccountId: ID
+  customerContactId: ID
+}
+
+type GqlFormSubmissionData {
+  status: String
+  adminNotes: String
+  number: String
+  jobId: ID
+  jobNumber: String
+}
+
+input GqlFormSubmissionFieldInput {
+  """
+  The id defined in the formTemplate for this field. Stored as formFieldId in the database.
+  """
+  id: ID!
+
+  """The raw JSON value for this field"""
+  value: JSON
+
+  """The type provided by the client, specifying the component type"""
+  type: String
+
+  """The structured item type for this field."""
+  itemType: GqlFieldItemType
+}
+
+type GqlFormSubmissionResponse {
+  code: Int!
+  success: Boolean!
+  message: String!
+  formSubmission: GqlFormSubmission
+}
+
+type GqlFormSubmissionsResponse {
+  items: [GqlFormSubmission!]!
+  pageInfo: PageInfo
+}
+
+type GqlFormTemplate {
+  id: ID!
+  alerts: [GqlFormTemplateAlert!]
+  accountId: String!
+  divisionId: String @deprecated(reason: "Use divisionIds instead")
+  divisionIds: [String!]
+  fields: [GqlFormTemplateField!]
+  formVersion: String!
+  templateVersion: String
+  renderEngineVersion: String
+  layouts: GqlFormTemplateLayouts
+  name: String!
+  flagForReview: Boolean
+  submitted: Boolean
+  subForms: [GqlSubFormTemplate!]
+  parameters: GqlFormTemplateParameters
+  logicRules: [FormTemplateRule!]
+  createdAt: DateTime
+  updatedAt: DateTime
+  formType: GqlFormType
+  formTypeSlug: ID
+  requiredServices: [GqlRequiredService]
+}
+
+type GqlFormTemplateAlert {
+  action: String
+  actionButton: String
+  cancelButton: String
+  hasTextField: Boolean
+  keyboard: String
+  message: String
+  textField: String
+  textFieldPrompt: String
+  textFieldInputId: String
+  title: String
+}
+
+input GqlFormTemplateAlertInput {
+  action: String
+  actionButton: String
+  cancelButton: String
+  hasTextField: Boolean
+  keyboard: String
+  message: String
+  textField: String
+  textFieldPrompt: String
+  textFieldInputId: String
+  title: String
+}
+
+type GqlFormTemplateAndroidLayout {
+  alerts: [GqlFormTemplateAlert!]
+  fields: [GqlFormTemplateField!]
+  subforms: [GqlSubFormTemplate!]
+}
+
+input GqlFormTemplateAndroidLayoutInput {
+  alerts: [GqlFormTemplateAlertInput!]
+  fields: [GqlFormTemplateFieldInput!]
+  subforms: [GqlSubFormTemplateInput!]
+}
+
+type GqlFormTemplateField {
+  id: ID
+  value: String
+  text: String
+  type: String
+  name: String
+  fieldType: String
+  columnStart: Int
+  columnEnd: Int
+  path: String
+  source: String
+  attributes: GqlFormTemplateFieldAttribute
+  fields: [GqlFormTemplateField!]
+  databinding: GqlFormTemplateFieldDatabinding
+  ruleHooks: [FormRuleHookUnion!]
+  addRowIf: String
+  action: String
+  columns: Int
+  keyboardType: String
+  required: Boolean
+  custom: String
+}
+
+type GqlFormTemplateFieldAttribute {
+  hidden: Boolean
+  autocapitalize: String
+  contentType: String
+  required: Boolean
+  analytics: Boolean
+  keyboardType: String
+  edit: Boolean
+  endText: String
+  tagText: String
+  customItems: Boolean
+  validate: String
+  addRowIf: String
+  addButton: Boolean
+  valueTextSize: String
+  valueTextWeight: String
+  nowrap: Boolean
+  titleTextSize: String
+  titleTextWeight: String
+  endId: String
+  startId: String
+  outId: String
+  hideTitle: Boolean
+  nullDash: Boolean
+  rowLimit: Int
+  showRequiredUser: Boolean
+  path: String
+  source: String
+  text: String
+  action: String
+  buttonStyle: String
+  visibleIf: String
+  style: String
+  checkbox: String
+  readOnly: Boolean
+  divider: Boolean
+  layout: String
+  alignment: String
+  extendedText: String
+  checkboxInputId: String
+  maxImages: String
+  dayCounterId: String
+  hiddenIf: String
+  title: String
+  adderFieldIds: [String!]
+  editTitle: String
+  options: String
+  mapping: String
+  discountsId: String
+  surchargeId: String
+  taxId: String
+  marginTop: String
+  marginBottom: String
+  marginX: String
+  marginY: String
+  endTimeId: String
+  notesId: String
+  startTimeId: String
+  taskTotalId: String
+  alertMessage: String
+  alertTitle: String
+  minuteIncrements: String
+  prompt: String
+  jobMapping: String
+  radioOptions: String
+  textSize: String
+  bannerTitles: String
+  name: String
+  isFormCreatedDate: Boolean
+  showOutTime: Boolean
+  customerAccountNameId: String
+  customerAccountBillingAddressId: String
+  customerContactNameId: String
+  customerContactPhoneId: String
+  customerContactEmailId: String
+}
+
+input GqlFormTemplateFieldAttributeInput {
+  hidden: Boolean
+  autocapitalize: String
+  contentType: String
+  required: Boolean
+  analytics: Boolean
+  keyboardType: String
+  edit: Boolean
+  endText: String
+  tagText: String
+  customItems: Boolean
+  validate: String
+  addRowIf: String
+  addButton: Boolean
+  valueTextSize: String
+  valueTextWeight: String
+  nowrap: Boolean
+  titleTextSize: String
+  titleTextWeight: String
+  endId: String
+  startId: String
+  outId: String
+  hideTitle: Boolean
+  nullDash: Boolean
+  rowLimit: Int
+  showRequiredUser: Boolean
+  path: String
+  source: String
+  text: String
+  action: String
+  buttonStyle: String
+  visibleIf: String
+  style: String
+  checkbox: String
+  readOnly: Boolean
+  divider: Boolean
+  layout: String
+  alignment: String
+  extendedText: String
+  checkboxInputId: String
+  maxImages: String
+  dayCounterId: String
+  hiddenIf: String
+  title: String
+  adderFieldIds: [String!]
+  editTitle: String
+  options: String
+  mapping: String
+  discountsId: String
+  surchargeId: String
+  taxId: String
+  marginTop: String
+  marginBottom: String
+  marginX: String
+  marginY: String
+  endTimeId: String
+  notesId: String
+  startTimeId: String
+  taskTotalId: String
+  alertMessage: String
+  alertTitle: String
+  minuteIncrements: String
+  prompt: String
+  jobMapping: String
+  radioOptions: String
+  textSize: String
+  bannerTitles: String
+  name: String
+  isFormCreatedDate: Boolean
+  showOutTime: Boolean
+  customerAccountNameId: String
+  customerAccountBillingAddressId: String
+  customerContactNameId: String
+  customerContactPhoneId: String
+  customerContactEmailId: String
+}
+
+type GqlFormTemplateFieldDatabinding {
+  autoSelect: String
+  expression: String
+  expressionVersion: String
+  onSelect: String
+  value: String
+  required: Boolean
+  dayCounterId: String
+}
+
+input GqlFormTemplateFieldDatabindingInput {
+  autoSelect: String
+  expression: String
+  expressionVersion: String
+  onSelect: String
+  value: String
+  required: Boolean
+  dayCounterId: String
+}
+
+input GqlFormTemplateFieldInput {
+  id: ID
+  value: String
+  text: String
+  type: String
+  name: String
+  fieldType: String
+  columnStart: Int
+  columnEnd: Int
+  path: String
+  source: String
+  attributes: GqlFormTemplateFieldAttributeInput
+  fields: [GqlFormTemplateFieldInput!]
+  databinding: GqlFormTemplateFieldDatabindingInput
+  ruleHooks: [FormRuleHookInput!]
+  addRowIf: String
+  action: String
+  columns: Int
+  keyboardType: String
+  required: Boolean
+  custom: String
+}
+
+type GqlFormTemplateHomePage {
+  quickLinks: [GqlFormTemplateQuickLink!]
+  templateTypeOrder: [GqlTemplateTypeOrder!]
+}
+
+input GqlFormTemplateInput {
+  id: ID
+  accountId: String!
+  divisionIds: [String!]
+  name: String!
+  formVersion: String!
+  templateVersion: String!
+  renderEngineVersion: String!
+  alerts: [GqlFormTemplateAlertInput!]
+  fields: [GqlFormTemplateFieldInput!]
+  layouts: GqlFormTemplateLayoutsInput
+  flagForReview: Boolean
+  submitted: Boolean
+  subForms: [GqlSubFormTemplateInput!]
+  parameters: GqlFormTemplateParametersInput
+  logicRules: [FormTemplateRuleInput!]
+  formTypeSlug: String
+  requiredServices: [GqlRequiredService!]
+}
+
+type GqlFormTemplateIOSLayout {
+  downloadName: String
+  fields: [GqlFormTemplateLayoutFields!]
+}
+
+input GqlFormTemplateIOSLayoutInput {
+  downloadName: String
+  fields: [GqlFormTemplateLayoutFieldsInput!]
+}
+
+type GqlFormTemplateLayoutFields {
+  id: ID
+  value: String
+  text: String
+  type: String
+  name: String
+  fieldType: String
+  columnStart: Int
+  columnEnd: Int
+  path: String
+  source: String
+  attributes: GqlFormTemplateFieldAttribute
+  fields: [GqlFormTemplateField!]
+  databinding: GqlFormTemplateFieldDatabinding
+  ruleHooks: [FormRuleHookUnion!]
+  action: String
+  columns: Int
+  keyboardType: String
+  required: Boolean
+  custom: String
+}
+
+input GqlFormTemplateLayoutFieldsInput {
+  id: ID
+  value: String
+  text: String
+  type: String
+  name: String
+  fieldType: String
+  columnStart: Int
+  columnEnd: Int
+  path: String
+  source: String
+  attributes: GqlFormTemplateFieldAttributeInput
+  fields: [GqlFormTemplateFieldInput!]
+  databinding: GqlFormTemplateFieldDatabindingInput
+  ruleHooks: [FormRuleHookInput!]
+  action: String
+  columns: Int
+  keyboardType: String
+  required: Boolean
+  custom: String
+}
+
+type GqlFormTemplateLayouts {
+  web: GqlFormTemplateWebLayout
+  ios: GqlFormTemplateIOSLayout
+  android: GqlFormTemplateAndroidLayout
+}
+
+input GqlFormTemplateLayoutsInput {
+  web: GqlFormTemplateWebLayoutInput
+  ios: GqlFormTemplateIOSLayoutInput
+  android: GqlFormTemplateAndroidLayoutInput
+}
+
+type GqlFormTemplateNotificationConfig {
+  formTemplateId: ID!
+  emails: [String!]!
+  templateId: String!
+}
+
+input GqlFormTemplateNotificationConfigInput {
+  formTemplateId: ID!
+  emails: [String!]!
+  templateId: String!
+}
+
+type GqlFormTemplateNotificationConfigResponse {
+  code: Int!
+  success: Boolean!
+  message: String!
+  formTemplateNotificationConfig: GqlFormTemplateNotificationConfig
+}
+
+type GqlFormTemplateParameters {
+  forDate: DateTime
+}
+
+input GqlFormTemplateParametersInput {
+  forDate: DateTime
+}
+
+type GqlFormTemplateQuickLink {
+  accountId: ID!
+  formId: ID!
+  formType: GqlFormType!
+  formTemplate: GqlFormTemplate!
+  divisionIds: [ID!]
+  displayName: String
+  ordinal: Int
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+input GqlFormTemplateQuickLinkBatchInput {
+  operation: GqlFormTemplateQuickLinkOperation
+  formId: ID!
+  currentFormTypeSlug: String!
+  newFormTypeSlug: String
+  accountId: ID!
+  displayName: String
+  ordinal: Int
+}
+
+input GqlFormTemplateQuickLinkInput {
+  operation: GqlFormTemplateQuickLinkOperation
+  formId: ID!
+  formTypeSlug: String!
+  accountId: ID!
+  displayName: String
+  ordinal: Int
+}
+
+enum GqlFormTemplateQuickLinkOperation {
+  CREATE
+  UPDATE
+  DELETE
+}
+
+type GqlFormTemplateResponse {
+  code: Int!
+  success: Boolean!
+  message: String!
+  formTemplate: GqlFormTemplate
+}
+
+type GqlFormTemplateWebLayout {
+  downloadName: String
+  fields: [GqlFormTemplateLayoutFields!]
+}
+
+input GqlFormTemplateWebLayoutInput {
+  downloadName: String
+  fields: [GqlFormTemplateLayoutFieldsInput!]
+}
+
+type GqlFormType {
+  slug: String!
+  displayName: String!
+  description: String
+  createdAt: DateTime!
+  updatedAt: DateTime
+  iconUrl: String
+  bgColor: String
+  iconType: String
+  ordinal: Int
+  isGlobal: Boolean!
+}
+
+type GqlFormTypeAccount {
+  displayName: String
+  accountId: String!
+  divisionIds: [String]
+  branchIds: [String]
+  createdAt: DateTime!
+  updatedAt: DateTime
+  iconUrl: String
+  bgColor: String
+  iconType: String
+  ordinal: Int
+  formType: GqlFormType!
+}
+
+type GqlInvoice {
+  jobId: String!
+  formSubmissionId: String!
+  accountId: String!
+  cycleStartDate: DateTime!
+  cycleEndDate: DateTime!
+  status: InvoiceStatus!
+  job: GqlJob!
+  amountCents: Int
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type GqlJob {
+  id: ID!
+  accountId: String!
+  createdAt: DateTime
+  updatedAt: DateTime
+  divisionId: String
+  branchId: String
+  address: GqlAddress
+  customer: GqlCustomer
+  number: String
+  notes: String
+  status: JobStatusEnum
+  name: String!
+  projectOwner: [String!]
+  salesPerson: [String!]
+  startDate: Date
+  endDate: Date
+  tasks: [GqlTask!]
+  jobType: JobTypeEnum
+  color: GqlColor
+  billingFrequency: BillingFrequency
+  isReadyForInvoice: Boolean
+  invoices: [GqlInvoice!]
+  quoteId: String
+  quotedCostCents: Int
+}
+
+type GqlJobDocument {
+  id: ID!
+  accountId: String!
+  createdAt: DateTime
+  updatedAt: DateTime
+  jobId: String
+  complexJobId: String
+  name: String!
+  url: String!
+  sizeBytes: Int!
+  thumbnailUrl: String
+  contentType: String
+  active: Boolean
+  isMobileViewable: Boolean
+  expiresAt: DateTime
+  version: String
+}
+
+type GqlJobOperatingCost {
+  quotedCost: String
+  assignedCrewCost: Int
+  assignedAssetCost: Int
+  projectedTotalCost: Int
+  projectedTotalRevenue: Int
+}
+
+type GqlJobSystemCheck {
+  message: String!
+  environment: JSON!
+  featureFlags: JSON
+  launchDarklyStatus: String
+  sqlStatus: String
+}
+
+type GqlLegacyAsset {
+  id: ID!
+  name: String!
+  status: String
+  imageUrl: String
+  latitude: String
+  longitude: String
+  address: String
+  lastSeen: DateTime
+  categoryId: ID
+  category: String
+  type: String
+}
+
+type GqlMeasureUnit {
+  name: String!
+  symbol: String!
+  type: MeasureType!
+  measureGroup: MeasureGroup!
+}
+
+type GqlPriceBookItem {
+  id: ID!
+  accountId: String!
+  divisionIds: [String!]
+  branchIds: [String!]
+  createdAt: DateTime
+  updatedAt: DateTime
+  name: String!
+  description: String
+  rate: Float!
+  unit: String!
+  defaultValue: Float
+  notes: String
+  category: String
+  status: String!
+  active: Boolean!
+}
+
+enum GqlRequiredService {
+  LOCATION
+}
+
+type GqlScheduledAsset {
+  assetId: ID!
+  asset: GqlLegacyAsset!
+  accountId: ID!
+  jobId: ID @deprecated(reason: "Use complexJob instead")
+  complexJobId: ID @deprecated(reason: "Use complexJob instead")
+  job: GqlJob @deprecated(reason: "Use complexJob instead")
+  complexJob: GqlComplexJob
+  complexTaskId: ID
+  complexTaskEntryId: ID
+  startAt: DateTime!
+  endAt: DateTime!
+}
+
+type GqlScheduledAssetsForJobResponse {
+  scheduledAssets: [GqlScheduledAsset!]!
+  overbookedAssets: [GqlScheduledAsset!]!
+  after: DateTime!
+  before: DateTime!
+  complexJobId: ID @deprecated(reason: "Use GqlScheduledAsset.ComplexJob instead")
+  jobId: ID @deprecated(reason: "Use GqlScheduledAsset.ComplexJob instead")
+}
+
+type GqlScheduledAssetsForTaskResponse {
+  taskId: ID!
+  scheduledAssets: [GqlScheduledAsset!]!
+  overbookedAssets: [GqlScheduledAsset!]!
+}
+
+type GqlSubFormTemplate {
+  id: String!
+  alerts: [GqlFormTemplateAlert!]
+  fields: [GqlFormTemplateField!]
+  name: String
+  parameters: GqlFormTemplateParameters
+}
+
+input GqlSubFormTemplateInput {
+  id: ID
+  name: String!
+  alerts: [GqlFormTemplateAlertInput!]
+  fields: [GqlFormTemplateFieldInput!]
+  parameters: GqlFormTemplateParametersInput
+}
+
+type GqlTask {
+  id: ID!
+  createdAt: DateTime
+  updatedAt: DateTime
+  accountId: String!
+  jobId: String!
+  date: Date
+  assets: [String!]
+  crew: [String!]
+  active: Boolean
+}
+
+type GqlTemplateTypeOrder {
+  formIds: [ID!]
+  formType: GqlFormType!
+}
+
+type GqlTimecardSystemCheck {
+  message: String!
+  environment: JSON!
+  featureFlags: JSON
+  launchDarklyStatus: String
+  sqlStatus: String
+}
+
+type GqlTimezoneFromCoordinates {
+  timezoneId: String!
+  timezoneName: String!
+}
+
+input GqlUpdateFormSubmissionInput {
+  fields: [GqlFormSubmissionFieldInput!]!
+  data: FormSubmissionDataInput
+  changeNotes: String
+  jobId: ID
+  jobNumber: String
+  customerAccountId: ID
+  customerContactId: ID
+}
+
+input GqlUpdateFormTemplateInput {
+  divisionId: String
+  divisionIds: [String!]
+  accountId: String
+  name: String
+  formVersion: String
+  templateVersion: String
+  renderEngineVersion: String
+  alerts: [GqlFormTemplateAlertInput]
+  fields: [GqlFormTemplateFieldInput]
+  layouts: GqlFormTemplateLayoutsInput
+  flagForReview: Boolean
+  submitted: Boolean
+  subForms: [GqlSubFormTemplateInput]
+  parameters: GqlFormTemplateParametersInput
+  logicRules: [FormTemplateRuleInput!]
+  formTypeSlug: String
+  requiredServices: [GqlRequiredService!]
+}
+
+input GqlUpdateInvoiceInput {
+  id: ID!
+  formSubmission: GqlUpdateFormSubmissionInput!
+  jobId: ID!
+  quoteId: ID
+  invoiceAmountCents: Int
+}
+
+type GqlUserSystemCheck {
+  message: String!
+  environment: JSON!
+  featureFlags: JSON
+  launchDarklyStatus: String
+  sqlStatus: String
+  minimumAndroidVersion: String
+  minimumIOSVersion: String
+}
+
+enum InvoiceStatus {
+  DRAFT
+  READY_TO_APPROVE
+  READY_TO_SEND
+  SENT
+  PAID
+  VOIDED
+}
+
+type JobDocumentResponse {
+  """Similar to HTTP status code, represents the status of the mutation"""
+  code: Int!
+
+  """Indicates whether the mutation was successful"""
+  success: Boolean!
+
+  """Human-readable message for the UI"""
+  message: String!
+
+  """The affected jobDocument object"""
+  jobDocument: GqlJobDocument
+}
+
+enum JobStatusEnum {
+  scheduled
+  opportunity
+  ongoing
+  complete
+}
+
+enum JobTypeEnum {
+  OPERATIONS
+  WAREHOUSE
+  RENTAL
+  MAINTENANCE
+  TRANSPORT
+}
+
+scalar JSON
+
+scalar JSONLogic
+
+input ListColorsInput {
+  accountId: String
+}
+
+input ListComplexInvoicesInput {
+  complexJobId: String
+  formSubmissionId: String
+  status: InvoiceStatus
+
+  """UNUSED - These are the dates for the invoice cycle"""
+  cycleStartDate: Date
+
+  """UNUSED - These are the dates for the invoice cycle"""
+  cycleEndDate: Date
+  job: ListInvoicesJobInput
+}
+
+input ListComplexJobsInput {
+  accountId: ID
+  name: String
+  number: String
+  customerName: String
+  customerAccountId: ID
+  locationName: String
+  divisionIds: [ID!]
+  branchIds: [ID!]
+  status: ComplexJobStatusEnum
+  jobType: ComplexJobTypeEnum
+  isActive: Boolean
+  startDate: Date
+  endDate: Date
+  userIds: [ID!]
+  pageInfo: PageInfoInput
+  isReadyForInvoice: Boolean
+  jobIds: [ID!]
+  searchTerm: String
+  salesPerson: String
+}
+
+type ListComplexJobsResponse {
+  code: Int!
+  success: Boolean!
+  message: String!
+  items: [GqlComplexJob!]!
+  pageInfo: PageInfo!
+}
+
+input ListComplexTaskEntriesInput {
+  id: ID
+  accountId: ID
+  complexTaskId: ID
+  startAt: Date
+  endAt: Date
+  assetIds: [ID!]
+  userIds: [ID!]
+}
+
+input ListComplexTasksForUserInput {
+  startDate: Date
+  endDate: Date
+}
+
+input ListComplexTasksInput {
+  taskIds: [ID!]
+  name: String
+  divisionIds: [ID!]
+  branchIds: [ID!]
+  afterDate: Date
+  beforeDate: Date
+  userIds: [ID!]
+  jobIds: [ID!]
+}
+
+type ListComplexTasksResponse {
+  code: Int!
+  success: Boolean!
+  message: String!
+  items: [GqlComplexTask!]!
+  pageInfo: PageInfo!
+}
+
+input ListFormSubmissionsForInvoiceInput {
+  startDate: Date!
+  endDate: Date
+  jobNumber: String!
+  order: OrderEnum
+  pageInfo: PageInfoInput
+}
+
+input ListFormSubmissionsInput {
+  formId: ID!
+  startDate: Date
+  endDate: Date
+  nextPageKey: ID
+  all: Boolean = false
+  order: OrderEnum
+  local: Boolean = false
+  userId: ID
+  status: String
+  number: String
+  dynamicFilters: JSON
+  pageInfo: PageInfoInput
+  formSubmissionIds: [ID!]
+  jobNumber: String
+  jobId: ID
+  formTypeSlug: String
+}
+
+input ListFormTemplatesInput {
+  formTypeSlug: String
+}
+
+input ListInvoicesInput {
+  jobId: String
+  formSubmissionId: String
+  status: InvoiceStatus
+  cycleStartDate: Date
+  cycleEndDate: Date
+  job: ListInvoicesJobInput
+}
+
+input ListInvoicesJobInput {
+  branchId: String
+  divisionId: String
+  salesPerson: String
+  searchTerm: NonEmptyString
+  customerAccountId: String
+  customerContactId: String
+}
+
+input ListJobDocumentsInput {
+  jobId: String!
+  isMobileViewable: Boolean
+  includeInactive: Boolean
+}
+
+input ListJobsInput {
+  divisionId: String
+  branchId: String
+  startDate: Date
+  endDate: Date
+  userId: String
+  isReadyForInvoice: Boolean
+  searchTerm: NonEmptyString
+  salesPerson: String
+}
+
+input ListJobsWithoutDatesInput {
+  divisionId: String
+  branchId: String
+  userId: String
+  isReadyForInvoice: Boolean
+  searchTerm: NonEmptyString
+  salesPerson: String
+}
+
+input ListPriceBookItemsInput {
+  divisionId: String
+  branchId: String
+  includeInactive: Boolean = false
+}
+
+type Location {
+  name: String
+  lat: Float
+  lng: Float
+}
+
+input LocationInput {
+  name: String
+  lat: Float
+  lng: Float
+}
+
+enum MeasureGroup {
+  METRIC
+  IMPERIAL
+  BOTH
+}
+
+enum MeasureType {
+  MASS
+  LENGTH
+  VOLUME
+  TEMPERATURE
+  ELECTRIC_CURRENT
+  UNIT
+  AREA
+}
+
+type Mutation {
+  createAsset(input: CreateAssetInput!): GqlAssetResponse!
+  updateAsset(input: UpdateAssetInput!): GqlAssetResponse!
+  deleteAsset(id: ID!): GqlAssetResponse!
+  createAssetTemplate(input: CreateAssetTemplateInput!): GqlAssetTemplateResponse!
+  updateAssetTemplate(input: UpdateAssetTemplateInput!): GqlAssetTemplateResponse!
+  deleteAssetTemplate(id: ID!): GqlAssetTemplateResponse!
+
+  """Create a new job document"""
+  createJobDocument(input: CreateJobDocumentInput!): JobDocumentResponse!
+
+  """Update an existing job document"""
+  updateJobDocument(input: UpdateJobDocumentInput!): JobDocumentResponse!
+
+  """Delete a job document"""
+  deleteJobDocument(id: ID!): DeleteJobDocumentResponse!
+
+  """Create a new price book item"""
+  createPriceBookItem(input: CreatePriceBookItemInput!): PriceBookItemResponse!
+
+  """Update an existing price book item"""
+  updatePriceBookItem(input: UpdatePriceBookItemInput!): PriceBookItemResponse!
+
+  """Delete a price book item"""
+  deletePriceBookItem(id: ID!): DeletePriceBookItemResponse!
+
+  """Create a new color"""
+  createColor(input: CreateColorInput!): ColorResponse!
+
+  """Update an existing color"""
+  updateColor(input: UpdateColorInput!): ColorResponse!
+
+  """Delete a color"""
+  deleteColor(id: ID!): DeleteColorResponse!
+
+  """Seed job colors for account"""
+  seedColors(accountId: ID!): SeedColorResponse!
+
+  """create a new complex job"""
+  createComplexJob(input: CreateComplexJobInput!): ComplexJobResponse!
+
+  """update an existing complex job"""
+  updateComplexJob(input: UpdateComplexJobInput!): ComplexJobResponse!
+
+  """Soft delete complexJob by setting isActive to false"""
+  deleteComplexJob(id: ID!): DeleteComplexJobResponse!
+
+  """create a new complex task"""
+  createComplexTask(input: CreateComplexTaskInput!): ComplexTaskResponse!
+
+  """update an existing complex task"""
+  updateComplexTask(input: UpdateComplexTaskInput!): ComplexTaskResponse!
+
+  """Soft delete complexTask by setting isActive to false"""
+  deleteComplexTask(id: ID!, jobId: ID!): DeleteComplexTaskResponse!
+
+  """update an existing complex task entry"""
+  updateComplexTaskEntry(input: UpdateComplexTaskEntryInput!): ComplexTaskEntryResponse!
+
+  """
+  INTERNAL to Jobs service, use timecard service createInvoice for public API
+  """
+  createComplexInvoice(input: CreateComplexInvoiceInput!): ComplexInvoiceResponse!
+
+  """
+  INTERNAL to Jobs service, use timecard service updateInvoice for public API
+  """
+  updateComplexInvoice(input: UpdateComplexInvoiceInput!): ComplexInvoiceResponse!
+
+  """cancel a complex invoice"""
+  cancelInvoice(input: CancelComplexInvoiceInput!): ComplexInvoiceResponse!
+  createFormTemplate(input: GqlFormTemplateInput!): GqlFormTemplateResponse
+  updateFormTemplate(id: ID!, input: GqlUpdateFormTemplateInput!): GqlFormTemplateResponse
+  deleteFormTemplate(id: ID!): GqlFormTemplateResponse
+  createFormSubmission(input: GqlCreateFormSubmissionInput!): GqlFormSubmissionResponse
+  updateFormSubmission(id: ID!, input: GqlUpdateFormSubmissionInput!): GqlFormSubmissionResponse
+  createFormPDFConfig(input: GqlFormPDFConfigInput!): GqlFormPDFConfigResponse
+  createFormType(input: CreateFormTypeInput!): GqlFormType!
+  updateFormType(slug: String!, input: UpdateFormTypeInput!): GqlFormType!
+  deleteFormType(slug: String!): Boolean!
+  createFormTypeAccount(input: CreateFormTypeAccountInput!): GqlFormTypeAccount!
+  updateFormTypeAccount(slug: String!, accountId: String!, input: UpdateFormTypeAccountInput!): GqlFormTypeAccount!
+  deleteFormTypeAccount(slug: String!, accountId: String!): Boolean!
+  deleteFormSubmission(id: ID!): Boolean!
+  createFormTemplateQuickLink(input: GqlFormTemplateQuickLinkInput!): GqlFormTemplateQuickLink!
+  updateFormTemplateQuickLink(input: GqlFormTemplateQuickLinkInput!): GqlFormTemplateQuickLink!
+  batchOperationsFormTemplateQuickLink(input: [GqlFormTemplateQuickLinkBatchInput!]!): [GqlFormTemplateQuickLink]!
+  deleteFormTemplateQuickLink(input: GqlFormTemplateQuickLinkInput!): Boolean!
+  createInvoice(input: GqlCreateInvoiceInput!): GqlFormSubmissionResponse
+  updateInvoice(input: GqlUpdateInvoiceInput!): GqlFormSubmissionResponse
+  formSubmissionsExport(formSubmissionId: ID!, fileType: FormSubmissionExportFileType!, formSubmissionSearchFilter: FormSubmissionSearchFilterInput!): String!
+  createFormTemplateNotificationConfig(input: GqlFormTemplateNotificationConfigInput!): GqlFormTemplateNotificationConfigResponse!
+  updateFormTemplateNotificationConfig(input: GqlFormTemplateNotificationConfigInput!): GqlFormTemplateNotificationConfigResponse!
+}
+
+scalar NonEmptyString
+
+enum OrderEnum {
+  ASC
+  DESC
+}
+
+type PageInfo {
+  limit: Int
+  nextPageKey: String
+  hasNextPage: Boolean!
+  totalCount: Int
+}
+
+input PageInfoInput {
+  limit: Int
+  nextPageKey: String
+}
+
+type PriceBookItemResponse {
+  """Similar to HTTP status code, represents the status of the mutation"""
+  code: Int!
+
+  """Indicates whether the mutation was successful"""
+  success: Boolean!
+
+  """Human-readable message for the UI"""
+  message: String!
+
+  """The affected jobDocument object"""
+  priceBookItem: GqlPriceBookItem
+}
+
+type PublicUserServiceSettings {
+  minimumAndroidVersion: String
+  minimumIOSVersion: String
+}
+
+type Query {
+  assetSystemCheck(input: SystemCheckInput): GqlAssetSystemCheck!
+  getAssetImportUploadPresignedUrl(accountId: ID!): String!
+  listMeasureUnits: [GqlMeasureUnit!]!
+  scheduledAssetsForJob(input: ScheduledAssetsForJobInput!): GqlScheduledAssetsForJobResponse! @deprecated(reason: "Use scheduledAssetsForJobs instead")
+  scheduledAssetsForJobs(input: ScheduledAssetsForJobsInput!): [GqlScheduledAssetsForJobResponse!]!
+  getAvailableAssetSchedule(input: AvailableAssetScheduleInput): GqlAvailableAssetSchedule
+  getAvailableAssetScheduleForTask(input: AvailableAssetScheduleForTaskInput!): GqlAvailableAssetScheduleForTask
+  timezoneFromCoordinates(input: TimezoneFromCoordinatesInput!): GqlTimezoneFromCoordinates
+  scheduledAssetsForTasks(input: ScheduledAssetsForTasksInput!): [GqlScheduledAssetsForTaskResponse!]!
+  assetTemplate(id: ID!): GqlAssetTemplate
+  assetTemplates: [GqlAssetTemplate!]!
+  baseAssetTemplate(id: ID!): GqlBaseAssetTemplate!
+  baseAssetTemplates: [GqlBaseAssetTemplate!]!
+  assets: [GqlAsset!]!
+  asset(id: ID!): GqlAsset!
+  jobSystemCheck(input: SystemCheckInput): GqlJobSystemCheck!
+  jobDocuments(filters: ListJobDocumentsInput!): [GqlJobDocument]
+  priceBookItems(filters: ListPriceBookItemsInput!): [GqlPriceBookItem]
+  color(id: ID!): GqlColor
+  colors(filters: ListColorsInput!): [GqlColor]
+  complexJob(input: ComplexJobInput!): GqlComplexJob
+  complexJobs(filters: ListComplexJobsInput!): ListComplexJobsResponse!
+  complexTask(id: ID!): GqlComplexTask
+  complexTasks(filters: ListComplexTasksInput!): [GqlComplexTask]
+  invoices(filters: ListInvoicesInput!): [GqlInvoice!]!
+  complexTaskEntries(filters: ListComplexTaskEntriesInput!): [GqlComplexTaskEntry!]!
+  complexInvoices(filters: ListComplexInvoicesInput!): [GqlComplexInvoice!]!
+  complexTasksForUser(filters: ListComplexTasksForUserInput!): [GqlComplexTask!]!
+  timecardSystemCheck(input: SystemCheckInput): GqlTimecardSystemCheck!
+  formTemplate(id: ID!): GqlFormTemplate
+  formTemplates(accountId: ID!, filters: ListFormTemplatesInput): [GqlFormTemplate]
+  formSubmission(id: ID!): GqlFormSubmission
+  formSubmissions(filters: ListFormSubmissionsInput!): GqlFormSubmissionsResponse
+  formSubmissionsForInvoice(filters: ListFormSubmissionsForInvoiceInput!): GqlFormSubmissionsResponse
+  userFormSubmissions(filters: UserFormSubmissionsInput!): GqlFormSubmissionsResponse
+  formPDFConfig(formId: ID!): GqlFormPDFConfig
+  formType(slug: String!): GqlFormType
+  formTypes: [GqlFormType!]!
+  formTypeAccount(formTypeSlug: String!, accountId: ID!): GqlFormTypeAccount
+  formTypeAccounts(accountId: ID!): [GqlFormTypeAccount!]!
+
+  """
+  Form Template Home Page
+  - If accountId is provided and user it's RIBBIOT_ADMIN, it will return the quick links and template type order for the inputted account
+  - If accountId is not provided, it will return the quick links and template type order for the current user's account that is the one in the JWT
+  """
+  formTemplateHomePage(accountId: ID): GqlFormTemplateHomePage!
+  formTemplateNotificationConfig(formTemplateId: ID!): GqlFormTemplateNotificationConfig
+  userSystemCheck(input: SystemCheckInput): GqlUserSystemCheck!
+
+  """Public facing user-service settings"""
+  publicUserServiceSettings: PublicUserServiceSettings!
+}
+
+input ScheduledAssetsForJobInput {
+  complexJobId: ID
+  after: DateTime!
+  before: DateTime!
+}
+
+input ScheduledAssetsForJobsInput {
+  jobInputs: [ScheduledAssetsForJobInput!]!
+}
+
+input ScheduledAssetsForTasksInput {
+  taskIds: [ID!]!
+}
+
+type SeedColorResponse {
+  """Similar to HTTP status code, represents the status of the mutation"""
+  code: Int!
+
+  """Indicates whether the mutation was successful"""
+  success: Boolean!
+
+  """Human-readable message for the UI"""
+  message: String!
+}
+
+input SystemCheckInput {
+  checkLaunchDarkly: Boolean = false
+  checkSQL: Boolean = false
+}
+
+scalar Time
+
+input TimezoneFromCoordinatesInput {
+  lat: String!
+  lng: String!
+  timestamp: DateTime
+}
+
+input UpdateAssetInput {
+  id: ID!
+  name: String
+  divisionId: String
+  branchId: String
+  source: String
+  notes: String
+  metadata: [GqlAssetMetadataInput!]
+  needsReview: Boolean
+}
+
+input UpdateAssetTemplateInput {
+  id: ID!
+  name: String
+  parentId: String
+  metadataSchema: JSON
+}
+
+input UpdateColorInput {
+  id: ID!
+  accountId: String
+  name: String
+  code: String
+}
+
+input UpdateComplexInvoiceInput {
+  id: ID!
+  accountId: ID
+  cycleStartDate: Date
+  cycleEndDate: Date
+  formSubmissionId: ID
+  status: InvoiceStatus
+  amountCents: Int
+}
+
+input UpdateComplexJobInput {
+  id: ID!
+  accountId: ID
+  isActive: Boolean
+  name: String
+  jobType: String
+  jobStatus: String
+  divisionIds: [ID!]
+  branchIds: [ID!]
+  projectOwner: String
+  location: LocationInput
+  salesPerson: String
+  number: String
+  notes: String
+  status: String
+  taskIds: [ID!]
+  documentIds: [ID!]
+  colorId: ID
+  quoteId: ID
+  quotedCostCents: Int
+  isReadyForInvoice: Boolean
+  billingFrequency: BillingFrequency
+  customerAccountId: ID
+  customerContactId: ID
+  siteContact: String
+  siteContactPhone: String
+}
+
+input UpdateComplexTaskEntryInput {
+  id: ID!
+  entryDate: Date
+  startTime: Time
+  endTime: Time
+  timezone: String
+  assetIds: [ID!]
+  userIds: [ID!]
+}
+
+input UpdateComplexTaskInput {
+  id: ID!
+  accountId: ID
+  isActive: Boolean
+  jobId: ID
+  taskType: String
+  name: String
+  startDate: DateTime
+  endDate: DateTime
+  startTime: Time
+  endTime: Time
+  timezone: String
+  rrule: String
+  status: String
+  location: LocationInput
+  divisionId: ID
+  branchId: ID
+  notes: String
+  userIds: [ID!]
+  assetIds: [ID!]
+  colorId: ID
+}
+
+input UpdateFormTypeAccountInput {
+  formTypeDisplayName: String
+  divisionIds: [String]
+  branchIds: [String]
+  updatedAt: DateTime
+  iconUrl: String
+  ordinal: Int
+}
+
+input UpdateFormTypeInput {
+  displayName: String!
+  description: String
+  iconUrl: String
+  updatedAt: DateTime!
+  isGlobal: Boolean!
+}
+
+input UpdateJobDatesInput {
+  id: ID!
+  startDate: Date
+  endDate: Date
+}
+
+input UpdateJobDocumentInput {
+  id: ID!
+  jobId: ID
+  complexJobId: ID
+  name: String
+  url: String
+  sizeBytes: Int
+  thumbnailUrl: String
+  contentType: String
+  active: Boolean
+  isMobileViewable: Boolean
+  expiresAt: DateTime
+  version: String
+}
+
+input UpdateJobInput {
+  id: ID!
+  name: String
+  divisionId: String
+  branchId: String
+  address: AddressInput
+  customer: CustomerInput
+  number: String
+  notes: String
+  status: String
+  projectOwner: [String!]
+  salesPerson: [String!]
+  crew: [String!]
+  assets: [String!]
+  jobType: JobTypeEnum
+  colorId: String
+  billingFrequency: BillingFrequency
+  isReadyForInvoice: Boolean
+  quoteId: String
+  quotedCostCents: Int
+}
+
+input UpdatePriceBookItemInput {
+  id: ID!
+  divisionIds: [String!]
+  branchIds: [String!]
+  name: String
+  description: String
+  rate: Float
+  unit: String
+  defaultValue: Float
+  notes: String
+  category: String
+  status: String
+}
+
+input UserFormSubmissionsInput {
+  formIds: [ID!]!
+  startDate: Date
+  endDate: Date
+  order: OrderEnum
+  pageInfo: PageInfoInput
+}

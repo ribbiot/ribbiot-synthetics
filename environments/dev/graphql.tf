@@ -7,6 +7,7 @@
 # ------------------------------------------------------------------------------
 
 # Global variables stored in Datadog; secrets passed via Terraform vars (never commit).
+# Store raw values in .env / tfvars; we URL-encode here so the Auth0 form body is valid.
 resource "datadog_synthetics_global_variable" "dev_auth0_domain" {
   name  = "DEV_AUTH0_DOMAIN"
   value = var.dev_auth0_domain
@@ -14,19 +15,47 @@ resource "datadog_synthetics_global_variable" "dev_auth0_domain" {
 
 resource "datadog_synthetics_global_variable" "dev_username" {
   name  = "DEV_USERNAME"
-  value = var.dev_username
+  value = urlencode(var.dev_username)
 }
 
 resource "datadog_synthetics_global_variable" "dev_password" {
   name   = "DEV_PASSWORD"
   secure = true
-  value  = var.dev_password
+  value  = urlencode(var.dev_password)
 }
 
 resource "datadog_synthetics_global_variable" "dev_client_secret" {
   name   = "DEV_CLIENT_SECRET"
   secure = true
-  value  = var.dev_client_secret
+  value  = urlencode(var.dev_client_secret)
+}
+
+# Synthetic data globals: one per key in synthetic_data_values (from synthetic-data/*.yaml).
+# Values are always strings (script JSON-encodes arrays).
+resource "datadog_synthetics_global_variable" "synthetic_data" {
+  for_each = var.synthetic_data_values
+  name     = each.key
+  value    = each.value
+}
+
+# Migrate existing DEV_ASSET_ACCOUNT_ID from the old resource to the new for_each (avoids destroy+recreate).
+moved {
+  from = datadog_synthetics_global_variable.dev_asset_account_id
+  to   = datadog_synthetics_global_variable.synthetic_data["DEV_ASSET_ACCOUNT_ID"]
+}
+
+# Reusable config_variable lists so tests can concat auth + synthetic data without repeating blocks.
+locals {
+  auth_config_vars = [
+    { name = "DEV_AUTH0_DOMAIN", id = datadog_synthetics_global_variable.dev_auth0_domain.id, type = "global" },
+    { name = "DEV_USERNAME", id = datadog_synthetics_global_variable.dev_username.id, type = "global" },
+    { name = "DEV_PASSWORD", id = datadog_synthetics_global_variable.dev_password.id, type = "global" },
+    { name = "DEV_CLIENT_SECRET", id = datadog_synthetics_global_variable.dev_client_secret.id, type = "global" },
+  ]
+  synthetic_data_config_vars = [
+    for k, v in datadog_synthetics_global_variable.synthetic_data : { name = k, id = v.id, type = "global" }
+  ]
+  graphql_config_variables = concat(local.auth_config_vars, local.synthetic_data_config_vars)
 }
 
 # Auth0 token request body (form-urlencoded). Audience must be valid for password grant.

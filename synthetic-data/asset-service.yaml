@@ -1,0 +1,100 @@
+# Synthetic data for Asset inventory service (Dev-AssetService).
+# Which query uses which data; set the actual values here (injected via Terraform globals).
+
+service: Asset inventory service
+graph: Dev-AssetService
+terraform_file: environments/dev/graphql_asset_service.tf
+
+queries:
+  - name: assetSystemCheck
+    implemented: true
+    synthetic_data: []
+    notes: No extra data.
+
+  - name: getAssetImportUploadPresignedUrl
+    implemented: true
+    synthetic_data:
+      - key: DEV_ASSET_ACCOUNT_ID
+        value: "dfb43473-e136-4ede-971f-3238b18d1f8b"
+        purpose: Account ID for presigned upload URL
+        where_to_set: Terraform var dev_asset_account_id → Datadog global DEV_ASSET_ACCOUNT_ID
+        format: ID
+    notes: Test only enabled in aws:ca-central-1 until accountId is set and tuned.
+
+  - name: listMeasureUnits
+    implemented: true
+    synthetic_data: []
+    notes: Test only enabled in aws:ca-central-1 until tuned.
+
+  - name: assetTemplates
+    implemented: true
+    synthetic_data: []
+
+  - name: baseAssetTemplates
+    implemented: true
+    synthetic_data: []
+
+  - name: assets
+    implemented: true
+    synthetic_data: []
+
+  - name: assetTemplate
+    implemented: false
+    synthetic_data:
+      - key: DEV_ASSET_TEMPLATE_ID
+        purpose: Asset template ID for assetTemplate(id) query
+        where_to_set: TBD (e.g. Terraform var + global variable)
+        format: ID
+
+  - name: baseAssetTemplate
+    implemented: false
+    synthetic_data:
+      - key: DEV_BASE_ASSET_TEMPLATE_ID
+        purpose: Base asset template ID for baseAssetTemplate(id) query
+        where_to_set: TBD
+        format: ID
+
+  - name: asset
+    implemented: false
+    synthetic_data:
+      - key: DEV_ASSET_ID
+        value: "62a755ac-b741-47da-82bd-b93103f3c2e6"
+        purpose: Asset ID for asset(id) query
+        where_to_set: Terraform var (e.g. dev_asset_id) → Datadog global DEV_ASSET_ID
+        format: ID
+
+  - name: getAvailableAssetSchedule
+    implemented: false
+    synthetic_data:
+      - key: (input)
+        purpose: startDate (Date!), optional endDate, timezone, searchTerm, assetType, divisionId, branchId, etc.
+        where_to_set: TBD (e.g. config or vars per run)
+        format: AvailableAssetScheduleInput
+
+  - name: getAvailableAssetScheduleForTask
+    implemented: false
+    synthetic_data:
+      - key: (input)
+        purpose: startDate (Date!), optional task/context fields
+        where_to_set: TBD
+        format: AvailableAssetScheduleForTaskInput
+
+  - name: scheduledAssetsForJobs
+    implemented: false
+    synthetic_data:
+      - key: (input)
+        purpose: jobInputs array with after, before (DateTime!), optional complexJobId
+        where_to_set: TBD
+        format: ScheduledAssetsForJobsInput
+
+  - name: scheduledAssetsForTasks
+    implemented: false
+    synthetic_data:
+      - key: DEV_SCHEDULED_ASSETS_TASK_IDS
+        value: ["4abc50fb-7278-4661-8de5-8db273353d60"]
+        purpose: "Task ID(s) for scheduledAssetsForTasks(input: { taskIds: [ID!]! })"
+        where_to_set: Terraform var (e.g. dev_scheduled_assets_task_ids) → Datadog global DEV_SCHEDULED_ASSETS_TASK_IDS
+        format: JSON array of ID
+    notes: >
+      Query and response verified with one task ID. Response includes scheduledAssets (asset id, name, category, lat/long, type, imageUrl, lastSeen)
+      and overbookedAssets (complexTaskId, asset id/name, complexJob). Backend may return null for complexJob (extensions.valueCompletion warnings).

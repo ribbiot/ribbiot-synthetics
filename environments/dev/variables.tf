@@ -61,11 +61,13 @@ variable "dev_client_secret" {
   sensitive   = true
 }
 
-# Optional: used by Asset Service query tests that need account-scoped data (e.g. getAssetImportUploadPresignedUrl).
-# Set when enabling those tests in graphql_asset_service.tf.
-variable "dev_asset_account_id" {
-  description = "Dev account ID for Asset Service query tests (e.g. getAssetImportUploadPresignedUrl). Leave empty until tuning."
-  type        = string
-  default     = ""
-  sensitive   = true
+# ------------------------------------------------------------------------------
+# Synthetic data: values from synthetic-data/*.yaml, injected by script.
+# Run: npm run tfvars:from-synthetic-data (writes synthetic-data.auto.tfvars.json).
+# No need to set these by hand unless you override.
+# ------------------------------------------------------------------------------
+variable "synthetic_data_values" {
+  description = "Map of global variable name -> string value (e.g. DEV_ASSET_ACCOUNT_ID, DEV_SCHEDULED_ASSETS_TASK_IDS). Populated from synthetic-data/*.yaml via scripts/synthetic-data-to-tfvars.ts. Arrays in YAML are JSON-encoded as strings."
+  type        = map(string)
+  default     = {}
 }
