@@ -40,77 +40,18 @@ locals {
   # complexTaskEntries(filters: ListComplexTaskEntriesInput!); uses DEV_COMPLEX_TASK_ENTRIES_ACCOUNT_ID. Short selection set.
   graphql_body_complex_task_entries = "{\"query\":\"query ComplexTaskEntries($filters: ListComplexTaskEntriesInput!) {\\n  complexTaskEntries(filters: $filters) {\\n    id\\n    accountId\\n    complexTaskId\\n    entryDate\\n    timezone\\n  }\\n}\",\"variables\":{\"filters\":{\"accountId\":\"{{DEV_COMPLEX_TASK_ENTRIES_ACCOUNT_ID}}\"}}}"
 
-  # validatesJSONPath assertions (mirror synthetic-test-config/graphql/dev/job-service.yaml)
-  job_system_check_jsonpath_assertions = [
-    { jsonpath = "$.data.jobSystemCheck.message", operator = "is", targetvalue = "Job Service is Running!" },
-    { jsonpath = "$.data.jobSystemCheck.launchDarklyStatus", operator = "is", targetvalue = "OK" },
-    { jsonpath = "$.data.jobSystemCheck.sqlStatus", operator = "is", targetvalue = "OK" },
-  ]
-  complex_job_jsonpath_assertions = [
-    { jsonpath = "$.data.complexJob.id", operator = "is", targetvalue = "d3484afb-b2cd-455b-b353-f745c5fa4d21" },
-    { jsonpath = "$.data.complexJob.name", operator = "is", targetvalue = "Datadog Synthetic Data (DON'T DELETE)" },
-    { jsonpath = "$.data.complexJob.status", operator = "is", targetvalue = "SCHEDULED" },
-    { jsonpath = "$.data.complexJob.customer.name", operator = "is", targetvalue = "Datadog" },
-    { jsonpath = "$.data.complexJob.tasks[0].id", operator = "is", targetvalue = "0468532f-bc99-42b9-9fa6-f1b0cd87789d" },
-  ]
-  price_book_items_jsonpath_assertions = [
-    { jsonpath = "$.data.priceBookItems[0].accountId", operator = "is", targetvalue = "dfb43473-e136-4ede-971f-3238b18d1f8b" },
-    { jsonpath = "$.data.priceBookItems[0].status", operator = "is", targetvalue = "active" },
-    { jsonpath = "$.data.priceBookItems[1].name", operator = "is", targetvalue = "Datadog Pricebook Item 1" },
-  ]
-  color_jsonpath_assertions = [
-    { jsonpath = "$.data.color.id", operator = "is", targetvalue = "d3f41c6e-afa8-41b4-9666-3ac2aa188b05" },
-    { jsonpath = "$.data.color.accountId", operator = "is", targetvalue = "dfb43473-e136-4ede-971f-3238b18d1f8b" },
-    { jsonpath = "$.data.color.name", operator = "is", targetvalue = "Sienna" },
-    { jsonpath = "$.data.color.code", operator = "is", targetvalue = "#A5243D" },
-  ]
-  colors_jsonpath_assertions = [
-    { jsonpath = "$.data.colors[0].accountId", operator = "is", targetvalue = "dfb43473-e136-4ede-971f-3238b18d1f8b" },
-    { jsonpath = "$.data.colors[0].name", operator = "is", targetvalue = "Blue" },
-    { jsonpath = "$.data.colors[0].code", operator = "is", targetvalue = "#2F5FC1" },
-  ]
-  complex_jobs_jsonpath_assertions = [
-    { jsonpath = "$.data.complexJobs.items[2].id", operator = "is", targetvalue = "d3484afb-b2cd-455b-b353-f745c5fa4d21" },
-    { jsonpath = "$.data.complexJobs.items[2].name", operator = "is", targetvalue = "Datadog Synthetic Data (DON'T DELETE)" },
-    { jsonpath = "$.data.complexJobs.items[2].customer.name", operator = "is", targetvalue = "Datadog" },
-    { jsonpath = "$.data.complexJobs.pageInfo.hasNextPage", operator = "is", targetvalue = "false" },
-    { jsonpath = "$.data.complexJobs.pageInfo.totalCount", operator = "is", targetvalue = "3" },
-  ]
-  complex_task_jsonpath_assertions = [
-    { jsonpath = "$.data.complexTask.id", operator = "is", targetvalue = "0468532f-bc99-42b9-9fa6-f1b0cd87789d" },
-    { jsonpath = "$.data.complexTask.name", operator = "is", targetvalue = "Datadog Synthetic Data (DON'T DELETE)" },
-    { jsonpath = "$.data.complexTask.status", operator = "is", targetvalue = "SCHEDULED" },
-    { jsonpath = "$.data.complexTask.job.id", operator = "is", targetvalue = "d3484afb-b2cd-455b-b353-f745c5fa4d21" },
-    { jsonpath = "$.data.complexTask.job.name", operator = "is", targetvalue = "Datadog Synthetic Data (DON'T DELETE)" },
-    { jsonpath = "$.data.complexTask.job.status", operator = "is", targetvalue = "SCHEDULED" },
-  ]
-  complex_tasks_jsonpath_assertions = [
-    { jsonpath = "$.data.complexTasks[0].id", operator = "is", targetvalue = "0468532f-bc99-42b9-9fa6-f1b0cd87789d" },
-    { jsonpath = "$.data.complexTasks[0].name", operator = "is", targetvalue = "Datadog Synthetic Data (DON'T DELETE)" },
-    { jsonpath = "$.data.complexTasks[0].job.id", operator = "is", targetvalue = "d3484afb-b2cd-455b-b353-f745c5fa4d21" },
-    { jsonpath = "$.data.complexTasks[0].job.name", operator = "is", targetvalue = "Datadog Synthetic Data (DON'T DELETE)" },
-    { jsonpath = "$.data.complexTasks[0].job.status", operator = "is", targetvalue = "SCHEDULED" },
-  ]
-  complex_invoices_jsonpath_assertions = [
-    { jsonpath = "$.data.complexInvoices[0].id", operator = "is", targetvalue = "32662958-039f-4f36-90bb-5a4364e9c807" },
-    { jsonpath = "$.data.complexInvoices[0].accountId", operator = "is", targetvalue = "dfb43473-e136-4ede-971f-3238b18d1f8b" },
-    { jsonpath = "$.data.complexInvoices[0].status", operator = "is", targetvalue = "READY_TO_APPROVE" },
-    { jsonpath = "$.data.complexInvoices[0].job.id", operator = "is", targetvalue = "d3484afb-b2cd-455b-b353-f745c5fa4d21" },
-    { jsonpath = "$.data.complexInvoices[0].job.name", operator = "is", targetvalue = "Datadog Synthetic Data (DON'T DELETE)" },
-    { jsonpath = "$.data.complexInvoices[0].job.customer.name", operator = "is", targetvalue = "Datadog" },
-  ]
-  complex_tasks_for_user_jsonpath_assertions = [
-    { jsonpath = "$.data.complexTasksForUser[0].id", operator = "is", targetvalue = "0468532f-bc99-42b9-9fa6-f1b0cd87789d" },
-    { jsonpath = "$.data.complexTasksForUser[0].name", operator = "is", targetvalue = "Datadog Synthetic Data (DON'T DELETE)" },
-    { jsonpath = "$.data.complexTasksForUser[0].status", operator = "is", targetvalue = "SCHEDULED" },
-    { jsonpath = "$.data.complexTasksForUser[0].accountId", operator = "is", targetvalue = "dfb43473-e136-4ede-971f-3238b18d1f8b" },
-  ]
-  complex_task_entries_jsonpath_assertions = [
-    { jsonpath = "$.data.complexTaskEntries[0].accountId", operator = "is", targetvalue = "dfb43473-e136-4ede-971f-3238b18d1f8b" },
-    { jsonpath = "$.data.complexTaskEntries[0].complexTaskId", operator = "is", targetvalue = "6522c383-36cc-4f4d-9089-19b4dcad70f5" },
-    { jsonpath = "$.data.complexTaskEntries[0].entryDate", operator = "is", targetvalue = "2026-08-20" },
-    { jsonpath = "$.data.complexTaskEntries[0].timezone", operator = "is", targetvalue = "America/Chicago" },
-  ]
+  # Assertions from synthetic-test-config (source of truth). Key = query name in YAML. Run: npm run tfvars:from-synthetic-test-config
+  job_system_check_jsonpath_assertions       = lookup(var.synthetic_test_assertions, "jobSystemCheck", [])
+  complex_job_jsonpath_assertions            = lookup(var.synthetic_test_assertions, "complexJob", [])
+  price_book_items_jsonpath_assertions       = lookup(var.synthetic_test_assertions, "priceBookItems", [])
+  color_jsonpath_assertions                  = lookup(var.synthetic_test_assertions, "color", [])
+  colors_jsonpath_assertions                 = lookup(var.synthetic_test_assertions, "colors", [])
+  complex_jobs_jsonpath_assertions           = lookup(var.synthetic_test_assertions, "complexJobs", [])
+  complex_task_jsonpath_assertions           = lookup(var.synthetic_test_assertions, "complexTask", [])
+  complex_tasks_jsonpath_assertions          = lookup(var.synthetic_test_assertions, "complexTasks", [])
+  complex_invoices_jsonpath_assertions       = lookup(var.synthetic_test_assertions, "complexInvoices", [])
+  complex_tasks_for_user_jsonpath_assertions = lookup(var.synthetic_test_assertions, "complexTasksForUser", [])
+  complex_task_entries_jsonpath_assertions   = lookup(var.synthetic_test_assertions, "complexTaskEntries", [])
 }
 
 resource "datadog_synthetics_test" "auth0_graphql_job_system_check_dev" {

@@ -32,3 +32,20 @@ variable "default_frequency" {
   type        = number
   default     = 7200
 }
+
+# Populated from synthetic-test-config/graphql/prod/*.yaml via npm run tfvars:from-synthetic-test-config.
+variable "synthetic_data_values" {
+  description = "Map of global variable name -> string value. Populated from synthetic-test-config YAML."
+  type        = map(string)
+  default     = {}
+}
+
+variable "synthetic_test_assertions" {
+  description = "Assertions per query (key = GraphQL query name from YAML). Populated from synthetic-test-config YAML by the same script."
+  type = map(list(object({
+    jsonpath    = string
+    operator    = string
+    targetvalue = string
+  })))
+  default = {}
+}

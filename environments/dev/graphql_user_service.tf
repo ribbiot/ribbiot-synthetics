@@ -8,14 +8,8 @@ locals {
   graphql_endpoint_user           = "https://ribbiot-router-dev.up.railway.app/graphql"
   graphql_body_user_system_check  = "{\"query\":\"query UserSystemCheck($input: SystemCheckInput) {\\n  userSystemCheck(input: $input) {\\n    message\\n    environment\\n    featureFlags\\n    launchDarklyStatus\\n    sqlStatus\\n    minimumAndroidVersion\\n    minimumIOSVersion\\n  }\\n}\",\"variables\":{\"input\":{\"checkLaunchDarkly\":true,\"checkSQL\":true}}}"
 
-  # validatesJSONPath assertions without assertion.target (provider warns if target is set)
-  user_system_check_jsonpath_assertions = [
-    { jsonpath = "$.data.userSystemCheck.message", operator = "is", targetvalue = "User Service is Running!" },
-    { jsonpath = "$.data.userSystemCheck.launchDarklyStatus", operator = "is", targetvalue = "OK" },
-    { jsonpath = "$.data.userSystemCheck.sqlStatus", operator = "is", targetvalue = "OK" },
-    { jsonpath = "$.data.userSystemCheck.minimumAndroidVersion", operator = "is", targetvalue = "0.0.2" },
-    { jsonpath = "$.data.userSystemCheck.minimumIOSVersion", operator = "is", targetvalue = "1.1.18" },
-  ]
+  # Assertions from synthetic-test-config (source of truth). Run: npm run tfvars:from-synthetic-test-config
+  user_system_check_jsonpath_assertions = lookup(var.synthetic_test_assertions, "userSystemCheck", [])
 }
 
 resource "datadog_synthetics_test" "auth0_graphql_user_system_check_dev" {

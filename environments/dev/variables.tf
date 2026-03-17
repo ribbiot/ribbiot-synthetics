@@ -72,3 +72,13 @@ variable "synthetic_data_values" {
   type        = map(string)
   default     = {}
 }
+
+variable "synthetic_test_assertions" {
+  description = "Assertions per query (key = GraphQL query name from YAML, e.g. jobSystemCheck, complexJobs). Populated from synthetic-test-config/graphql/<env>/*.yaml by the same script. Source of truth is the YAML; run npm run tfvars:from-synthetic-test-config before apply."
+  type = map(list(object({
+    jsonpath    = string
+    operator    = string
+    targetvalue = string
+  })))
+  default = {}
+}

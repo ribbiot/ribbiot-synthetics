@@ -7,4 +7,21 @@ service: Timecard service
 graph: Dev-TimecardService
 terraform_file: environments/dev/graphql_timecard_service.tf
 
-queries: []
+queries:
+  - name: timecardSystemCheck
+    synthetic_data: []
+    notes: Health check; no extra data.
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+    assertions:
+      - jsonpath: "$.data.timecardSystemCheck.message"
+        operator: is
+        targetvalue: "Timecard system is up and running!"
+      - jsonpath: "$.data.timecardSystemCheck.launchDarklyStatus"
+        operator: is
+        targetvalue: "OK"
+      - jsonpath: "$.data.timecardSystemCheck.sqlStatus"
+        operator: is
+        targetvalue: "OK"

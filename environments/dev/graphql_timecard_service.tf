@@ -8,12 +8,8 @@ locals {
   graphql_endpoint_timecard         = "https://ribbiot-router-dev.up.railway.app/graphql"
   graphql_body_timecard_system_check = "{\"query\":\"query TimecardSystemCheck($input: SystemCheckInput) {\\n  timecardSystemCheck(input: $input) {\\n    message\\n    environment\\n    featureFlags\\n    launchDarklyStatus\\n    sqlStatus\\n  }\\n}\",\"variables\":{\"input\":{\"checkLaunchDarkly\":true,\"checkSQL\":true}}}"
 
-  # validatesJSONPath assertions without assertion.target (provider warns if target is set)
-  timecard_system_check_jsonpath_assertions = [
-    { jsonpath = "$.data.timecardSystemCheck.message", operator = "is", targetvalue = "Timecard system is up and running!" },
-    { jsonpath = "$.data.timecardSystemCheck.launchDarklyStatus", operator = "is", targetvalue = "OK" },
-    { jsonpath = "$.data.timecardSystemCheck.sqlStatus", operator = "is", targetvalue = "OK" },
-  ]
+  # Assertions from synthetic-test-config (source of truth). Run: npm run tfvars:from-synthetic-test-config
+  timecard_system_check_jsonpath_assertions = lookup(var.synthetic_test_assertions, "timecardSystemCheck", [])
 }
 
 resource "datadog_synthetics_test" "auth0_graphql_timecard_system_check_dev" {
