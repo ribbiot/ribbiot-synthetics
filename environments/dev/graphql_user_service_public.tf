@@ -9,10 +9,8 @@ locals {
   graphql_endpoint_user_public = "https://ribbiot-router-dev.up.railway.app/graphql"
   graphql_body_public_user_settings = "{\"query\":\"query PublicUserServiceSettings {\\n  publicUserServiceSettings {\\n    minimumAndroidVersion\\n    minimumIOSVersion\\n  }\\n}\"}"
 
-  public_user_settings_jsonpath_assertions = [
-    { jsonpath = "$.data.publicUserServiceSettings.minimumAndroidVersion", operator = "is", targetvalue = "0.0.2" },
-    { jsonpath = "$.data.publicUserServiceSettings.minimumIOSVersion", operator = "is", targetvalue = "1.1.18" },
-  ]
+  # Assertions from synthetic-test-config (source of truth). Run: npm run tfvars:from-synthetic-test-config
+  public_user_settings_jsonpath_assertions = lookup(var.synthetic_test_assertions, "publicUserServiceSettings", [])
 }
 
 resource "datadog_synthetics_test" "graphql_public_user_service_settings_dev" {

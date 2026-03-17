@@ -1,5 +1,6 @@
 # GraphQL synthetic data for Job service — PROD only.
 # Schema: docs/synthetic-test-config-schema.md
+# Query names aligned with Apollo Studio Prod-JobService schema.
 
 scope: graphql
 environment: prod
@@ -7,4 +8,89 @@ service: Job service
 graph: Prod-JobService
 terraform_file: environments/prod/graphql_job_service.tf
 
-queries: []
+queries:
+  - name: jobSystemCheck
+    synthetic_data: []
+    notes: Health check; no extra data.
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+    assertions:
+      - jsonpath: "$.data.jobSystemCheck.message"
+        operator: is
+        targetvalue: "Job Service is Running!"
+      - jsonpath: "$.data.jobSystemCheck.launchDarklyStatus"
+        operator: is
+        targetvalue: "OK"
+      - jsonpath: "$.data.jobSystemCheck.sqlStatus"
+        operator: is
+        targetvalue: "OK"
+
+  - name: jobDocuments
+    excluded: true
+    synthetic_data: []
+    notes: "jobDocuments(filters: ListJobDocumentsInput!). Add synthetic_data + assertions when you have a working request/response."
+
+  - name: priceBookItems
+    excluded: true
+    synthetic_data: []
+    notes: "priceBookItems(filters: ListPriceBookItemsInput!). Add synthetic_data + assertions when you have a working request/response."
+
+  - name: color
+    excluded: true
+    synthetic_data:
+      - key: PROD_JOB_COLOR_ID
+        purpose: "Color ID for color(id: ID!) query"
+        where_to_set: Terraform global when enabling
+        format: ID
+    notes: "color(id: ID!). Add value + assertions when you have a working request/response."
+
+  - name: colors
+    excluded: true
+    synthetic_data: []
+    notes: "colors(filters: ListColorsInput!). Add synthetic_data + assertions when you have a working request/response."
+
+  - name: complexJob
+    excluded: true
+    synthetic_data: []
+    notes: "complexJob(input: ComplexJobInput!). Add synthetic_data + assertions when you have a working request/response."
+
+  - name: complexJobs
+    excluded: true
+    synthetic_data: []
+    notes: "complexJobs(filters: ListComplexJobsInput!). Add synthetic_data + assertions when you have a working request/response."
+
+  - name: complexTask
+    excluded: true
+    synthetic_data:
+      - key: PROD_JOB_COMPLEX_TASK_ID
+        purpose: "Complex task ID for complexTask(id: ID!) query"
+        where_to_set: Terraform global when enabling
+        format: ID
+    notes: "complexTask(id: ID!). Add value + assertions when you have a working request/response."
+
+  - name: complexTasks
+    excluded: true
+    synthetic_data: []
+    notes: "complexTasks(filters: ListComplexTasksInput!). Add synthetic_data + assertions when you have a working request/response."
+
+  - name: invoices
+    excluded: true
+    synthetic_data: []
+    notes: "invoices(filters: ListInvoicesInput!). Add synthetic_data + assertions when you have a working request/response."
+
+  - name: complexTaskEntries
+    excluded: true
+    synthetic_data: []
+    notes: "complexTaskEntries(filters: ListComplexTaskEntriesInput!). Add synthetic_data + assertions when you have a working request/response."
+
+  - name: complexInvoices
+    excluded: true
+    synthetic_data: []
+    notes: "complexInvoices(filters: ListComplexInvoicesInput!). Add synthetic_data + assertions when you have a working request/response."
+
+  - name: complexTasksForUser
+    excluded: true
+    synthetic_data: []
+    notes: "complexTasksForUser(filters: ListComplexTasksForUserInput!). Add synthetic_data + assertions when you have a working request/response."

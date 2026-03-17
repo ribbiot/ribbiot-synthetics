@@ -1,9 +1,10 @@
 #!/usr/bin/env npx tsx
 /**
  * Reads synthetic-test-config/graphql/<env>/*.yaml (dev and prod separately), collects
- * every synthetic_data key+value (where value is set) per environment, and writes
+ * synthetic_data key+value and assertions per query, and writes
  * environments/<env>/synthetic-test-config.auto.tfvars.json so Terraform gets
- * var.synthetic_data_values without setting variables by hand.
+ * var.synthetic_data_values and var.synthetic_test_assertions. Config YAML is the
+ * source of truth; run this before tf:plan / tf:apply.
  *
  * Run before tf:plan:dev / tf:apply:dev (or prod). Generates both dev and prod
  * tfvars by default; pass --env dev or --env prod to generate only one.
@@ -25,9 +26,16 @@ interface SyntheticDataItem {
   format?: string;
 }
 
+interface AssertionItem {
+  jsonpath?: string;
+  operator?: string;
+  targetvalue?: string;
+}
+
 interface QueryEntry {
   name?: string;
   synthetic_data?: SyntheticDataItem[];
+  assertions?: AssertionItem[];
   /** When true, this query is omitted from tfvars and Terraform test generation (e.g. endpoint unused or data unreliable). */
   excluded?: boolean;
 }
@@ -59,8 +67,28 @@ function collectValuesFromDoc(doc: ServiceDoc, values: Record<string, string>): 
   }
 }
 
-function collectValuesForEnv(env: string): Record<string, string> {
+type AssertionOutput = { jsonpath: string; operator: string; targetvalue: string }[];
+
+function collectAssertionsFromDoc(doc: ServiceDoc, assertions: Record<string, AssertionOutput>): void {
+  if (!doc?.queries) return;
+  for (const q of doc.queries) {
+    const name = q.name;
+    const list = q.assertions ?? [];
+    if (name && list.length > 0) {
+      assertions[name] = list.map((a) => ({
+        jsonpath: String(a.jsonpath ?? ""),
+        operator: String(a.operator ?? "is"),
+        targetvalue: String(a.targetvalue ?? ""),
+      }));
+    }
+  }
+}
+
+function collectForEnv(
+  env: string
+): { values: Record<string, string>; assertions: Record<string, AssertionOutput> } {
   const values: Record<string, string> = {};
+  const assertions: Record<string, AssertionOutput> = {};
   const envDir = path.join(GRAPHQL_DIR, env);
   const files = readYamlDir(envDir);
   if (files.length > 0) {
@@ -68,8 +96,9 @@ function collectValuesForEnv(env: string): Record<string, string> {
       const content = fs.readFileSync(path.join(envDir, file), "utf8");
       const doc = YAML.parse(content) as ServiceDoc;
       collectValuesFromDoc(doc, values);
+      collectAssertionsFromDoc(doc, assertions);
     }
-    return values;
+    return { values, assertions };
   }
   // Fallback: legacy graphql/*.yaml (single file with environments.dev/prod) in synthetic-test-config for dev only
   if (env === "dev") {
@@ -93,9 +122,9 @@ function collectValuesForEnv(env: string): Record<string, string> {
         }
       }
     }
-    if (Object.keys(values).length > 0) return values;
+    if (Object.keys(values).length > 0) return { values, assertions };
   }
-  return values;
+  return { values, assertions };
 }
 
 function main(): void {
@@ -107,13 +136,16 @@ function main(): void {
 
   const written: string[] = [];
   for (const env of envs) {
-    const values = collectValuesForEnv(env);
+    const { values, assertions } = collectForEnv(env);
     const outFile = path.join(REPO_ROOT, "environments", env, "synthetic-test-config.auto.tfvars.json");
     const outDir = path.dirname(outFile);
     if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
-    const payload = { synthetic_data_values: values };
+    const payload = {
+      synthetic_data_values: values,
+      synthetic_test_assertions: assertions,
+    };
     fs.writeFileSync(outFile, JSON.stringify(payload, null, 2) + "\n", "utf8");
-    written.push(`${env} (${Object.keys(values).length} value(s))`);
+    written.push(`${env} (${Object.keys(values).length} value(s), ${Object.keys(assertions).length} assertion set(s))`);
   }
   console.log(`Wrote synthetic-test-config.auto.tfvars.json for: ${written.join(", ")}`);
 }
