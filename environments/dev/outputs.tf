@@ -13,6 +13,11 @@ output "auth0_graphql_user_system_check_test_id" {
   value       = datadog_synthetics_test.auth0_graphql_user_system_check_dev.id
 }
 
+output "graphql_public_user_service_settings_test_id" {
+  description = "Datadog test ID for GraphQL (public): publicUserServiceSettings."
+  value       = datadog_synthetics_test.graphql_public_user_service_settings_dev.id
+}
+
 output "auth0_graphql_job_system_check_test_id" {
   description = "Datadog test ID for GraphQL: jobSystemCheck."
   value       = datadog_synthetics_test.auth0_graphql_job_system_check_dev.id
