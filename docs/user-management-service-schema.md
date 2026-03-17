@@ -117,7 +117,36 @@ queries:
 
 ---
 
-## 5. Apollo schema source
+## 5. User Service Public schema (Dev-UserService-Public)
+
+The **public-facing** User Service schema exposes unauthenticated queries (no Auth0). Use graph `Dev-UserService-Public` (dev) or `Prod-UserService-Public` (prod). Synthetic tests for these are **single-step** (POST to GraphQL with no `Authorization` header).
+
+### Public schema (from supergraph)
+
+```graphql
+type PublicUserServiceSettings {
+  minimumAndroidVersion: String
+  minimumIOSVersion: String
+}
+
+type Query {
+  """Public facing user-service settings"""
+  publicUserServiceSettings: PublicUserServiceSettings!
+}
+```
+
+### Public query for config
+
+| Query | Input | Auth | Description |
+|-------|--------|------|-------------|
+| `publicUserServiceSettings` | None | No | Returns min app versions. Single-step test; no synthetic_data. |
+
+Config files: `synthetic-test-config/graphql/<env>/user-service-public.yaml` (separate from `user-service.yaml` so public tests stay single-step in Terraform).
+
+---
+
+## 6. Apollo schema source
 
 - **Dev User Service:** [Apollo Studio – Dev-UserService](https://studio.apollographql.com/graph/Ribbiot-Serverless/variant/dev-current/schema/sdl?selectedSchema=Dev-UserService)
+- **Dev User Service (Public):** [Apollo Studio – Dev-UserService-Public](https://studio.apollographql.com/graph/Ribbiot-Serverless/variant/dev-current/schema/sdl?selectedSchema=Dev-UserService-Public)
 - **Config:** `config/schema-options.json` lists `Dev-UserService` and `Dev-UserService-Public`; use `npm run mcp:select-schema` to pick the User Service schema when working with MCP.
