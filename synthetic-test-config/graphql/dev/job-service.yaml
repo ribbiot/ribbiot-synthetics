@@ -1,5 +1,7 @@
 # GraphQL synthetic data for Job service — DEV only.
 # Schema: docs/synthetic-test-config-schema.md
+# Source of truth for Query names: Apollo Studio Dev-JobService
+# https://studio.apollographql.com/graph/Ribbiot-Serverless/variant/dev-current/schema/sdl?selectedSchema=Dev-JobService
 
 scope: graphql
 environment: dev
@@ -7,9 +9,316 @@ service: Job service
 graph: Dev-JobService
 terraform_file: environments/dev/graphql_job_service.tf
 
-queries: []
-# Add entries as you implement query synthetics, e.g.:
-#   - name: jobSystemCheck
-#     synthetic_data: []
-#     locations: ["aws:us-east-1"]
-#     assertions: [...]
+queries:
+  - name: jobSystemCheck
+    synthetic_data: []
+    notes: Health check; no extra data. Same shape as assetSystemCheck (message, launchDarklyStatus, sqlStatus).
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+    assertions:
+      - jsonpath: "$.data.jobSystemCheck.message"
+        operator: is
+        targetvalue: "Job Service is Running!"
+      - jsonpath: "$.data.jobSystemCheck.launchDarklyStatus"
+        operator: is
+        targetvalue: "OK"
+      - jsonpath: "$.data.jobSystemCheck.sqlStatus"
+        operator: is
+        targetvalue: "OK"
+
+  - name: jobDocuments
+    excluded: true
+    synthetic_data: []
+    notes: "jobDocuments(filters: ListJobDocumentsInput!). Add synthetic_data + assertions when you have a working request/response."
+
+  - name: priceBookItems
+    synthetic_data: []
+    notes: "priceBookItems(filters: $filters) with empty filters. Returns list of price book items; asserts first item shape and synthetic item presence."
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+    assertions:
+      - jsonpath: "$.data.priceBookItems[0].accountId"
+        operator: is
+        targetvalue: "dfb43473-e136-4ede-971f-3238b18d1f8b"
+      - jsonpath: "$.data.priceBookItems[0].status"
+        operator: is
+        targetvalue: "active"
+      - jsonpath: "$.data.priceBookItems[1].name"
+        operator: is
+        targetvalue: "Datadog Pricebook Item 1"
+
+  - name: color
+    synthetic_data:
+      - key: DEV_JOB_COLOR_ID
+        value: "d3f41c6e-afa8-41b4-9666-3ac2aa188b05"
+        purpose: "Color ID for color(id: $colorId) query"
+        where_to_set: Terraform global DEV_JOB_COLOR_ID
+        format: ID
+    notes: "color(id: ID!). Returns single color by id."
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+    assertions:
+      - jsonpath: "$.data.color.id"
+        operator: is
+        targetvalue: "d3f41c6e-afa8-41b4-9666-3ac2aa188b05"
+      - jsonpath: "$.data.color.accountId"
+        operator: is
+        targetvalue: "dfb43473-e136-4ede-971f-3238b18d1f8b"
+      - jsonpath: "$.data.color.name"
+        operator: is
+        targetvalue: "Sienna"
+      - jsonpath: "$.data.color.code"
+        operator: is
+        targetvalue: "#A5243D"
+
+  - name: colors
+    synthetic_data:
+      - key: DEV_JOB_COLORS_ACCOUNT_ID
+        value: "dfb43473-e136-4ede-971f-3238b18d1f8b"
+        purpose: "Account ID for colors(filters: { accountId }) query"
+        where_to_set: Terraform global DEV_JOB_COLORS_ACCOUNT_ID
+        format: ID
+    notes: "colors(filters: ListColorsInput!). Returns list of colors for account; asserts first item shape."
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+    assertions:
+      - jsonpath: "$.data.colors[0].accountId"
+        operator: is
+        targetvalue: "dfb43473-e136-4ede-971f-3238b18d1f8b"
+      - jsonpath: "$.data.colors[0].name"
+        operator: is
+        targetvalue: "Blue"
+      - jsonpath: "$.data.colors[0].code"
+        operator: is
+        targetvalue: "#2F5FC1"
+
+  - name: complexJob
+    synthetic_data:
+      - key: DEV_COMPLEX_JOB_ID
+        value: "d3484afb-b2cd-455b-b353-f745c5fa4d21"
+        purpose: "Complex job ID for complexJob(input: { id }) — synthetic data job (DON'T DELETE)"
+        where_to_set: Terraform global DEV_COMPLEX_JOB_ID
+        format: ID
+    notes: Returns job with customer, tasks, documents. Uses dedicated synthetic job in dev.
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+    assertions:
+      - jsonpath: "$.data.complexJob.id"
+        operator: is
+        targetvalue: "d3484afb-b2cd-455b-b353-f745c5fa4d21"
+      - jsonpath: "$.data.complexJob.name"
+        operator: is
+        targetvalue: "Datadog Synthetic Data (DON'T DELETE)"
+      - jsonpath: "$.data.complexJob.status"
+        operator: is
+        targetvalue: "SCHEDULED"
+      - jsonpath: "$.data.complexJob.customer.name"
+        operator: is
+        targetvalue: "Datadog"
+      - jsonpath: "$.data.complexJob.tasks[0].id"
+        operator: is
+        targetvalue: "0468532f-bc99-42b9-9fa6-f1b0cd87789d"
+
+  - name: complexJobs
+    synthetic_data:
+      - key: DEV_COMPLEX_JOBS_START_DATE
+        value: "2026-02-16"
+        purpose: startDate for complexJobs(filters) date range
+        where_to_set: Terraform global DEV_COMPLEX_JOBS_START_DATE
+        format: Date (YYYY-MM-DD)
+      - key: DEV_COMPLEX_JOBS_END_DATE
+        value: "2026-02-22"
+        purpose: endDate for complexJobs(filters) date range
+        where_to_set: Terraform global DEV_COMPLEX_JOBS_END_DATE
+        format: Date (YYYY-MM-DD)
+    notes: complexJobs(filters) with date range; returns items + pageInfo. Asserts synthetic job in first item.
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+    assertions:
+      - jsonpath: "$.data.complexJobs.items[2].id"
+        operator: is
+        targetvalue: "d3484afb-b2cd-455b-b353-f745c5fa4d21"
+      - jsonpath: "$.data.complexJobs.items[2].name"
+        operator: is
+        targetvalue: "Datadog Synthetic Data (DON'T DELETE)"
+      - jsonpath: "$.data.complexJobs.items[2].customer.name"
+        operator: is
+        targetvalue: "Datadog"
+      - jsonpath: "$.data.complexJobs.pageInfo.hasNextPage"
+        operator: is
+        targetvalue: "false"
+      - jsonpath: "$.data.complexJobs.pageInfo.totalCount"
+        operator: is
+        targetvalue: "3"
+
+  - name: complexTask
+    synthetic_data:
+      - key: DEV_JOB_COMPLEX_TASK_ID
+        value: "0468532f-bc99-42b9-9fa6-f1b0cd87789d"
+        purpose: "Complex task ID for complexTask(id: $complexTaskId) query — synthetic task (DON'T DELETE)"
+        where_to_set: Terraform global DEV_JOB_COMPLEX_TASK_ID
+        format: ID
+    notes: "complexTask(id: ID!). Returns single task with job details. Uses dedicated synthetic task in dev."
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+    assertions:
+      - jsonpath: "$.data.complexTask.id"
+        operator: is
+        targetvalue: "0468532f-bc99-42b9-9fa6-f1b0cd87789d"
+      - jsonpath: "$.data.complexTask.name"
+        operator: is
+        targetvalue: "Datadog Synthetic Data (DON'T DELETE)"
+      - jsonpath: "$.data.complexTask.status"
+        operator: is
+        targetvalue: "SCHEDULED"
+      - jsonpath: "$.data.complexTask.job.id"
+        operator: is
+        targetvalue: "d3484afb-b2cd-455b-b353-f745c5fa4d21"
+      - jsonpath: "$.data.complexTask.job.name"
+        operator: is
+        targetvalue: "Datadog Synthetic Data (DON'T DELETE)"
+      - jsonpath: "$.data.complexTask.job.status"
+        operator: is
+        targetvalue: "SCHEDULED"
+
+  - name: complexTasks
+    synthetic_data:
+      - key: DEV_COMPLEX_TASKS_AFTER_DATE
+        value: "2026-02-16"
+        purpose: afterDate for complexTasks(filters) date range
+        where_to_set: Terraform global DEV_COMPLEX_TASKS_AFTER_DATE
+        format: Date (YYYY-MM-DD)
+      - key: DEV_COMPLEX_TASKS_BEFORE_DATE
+        value: "2026-02-16"
+        purpose: beforeDate for complexTasks(filters) date range
+        where_to_set: Terraform global DEV_COMPLEX_TASKS_BEFORE_DATE
+        format: Date (YYYY-MM-DD)
+    notes: complexTasks(filters) with afterDate/beforeDate. Returns tasks with job; asserts synthetic task in first result.
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+    assertions:
+      - jsonpath: "$.data.complexTasks[0].id"
+        operator: is
+        targetvalue: "0468532f-bc99-42b9-9fa6-f1b0cd87789d"
+      - jsonpath: "$.data.complexTasks[0].name"
+        operator: is
+        targetvalue: "Datadog Synthetic Data (DON'T DELETE)"
+      - jsonpath: "$.data.complexTasks[0].job.id"
+        operator: is
+        targetvalue: "d3484afb-b2cd-455b-b353-f745c5fa4d21"
+      - jsonpath: "$.data.complexTasks[0].job.name"
+        operator: is
+        targetvalue: "Datadog Synthetic Data (DON'T DELETE)"
+      - jsonpath: "$.data.complexTasks[0].job.status"
+        operator: is
+        targetvalue: "SCHEDULED"
+
+  - name: invoices
+    excluded: true
+    synthetic_data: []
+    notes: "invoices(filters: ListInvoicesInput!). Add synthetic_data + assertions when you have a working request/response."
+
+  - name: complexTaskEntries
+    synthetic_data:
+      - key: DEV_COMPLEX_TASK_ENTRIES_ACCOUNT_ID
+        value: "dfb43473-e136-4ede-971f-3238b18d1f8b"
+        purpose: "accountId for complexTaskEntries(filters: { accountId })"
+        where_to_set: Terraform global DEV_COMPLEX_TASK_ENTRIES_ACCOUNT_ID
+        format: ID
+    notes: "complexTaskEntries(filters). Short query (id, accountId, complexTaskId, entryDate, timezone). Asserts first entry shape."
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+    assertions:
+      - jsonpath: "$.data.complexTaskEntries[0].accountId"
+        operator: is
+        targetvalue: "dfb43473-e136-4ede-971f-3238b18d1f8b"
+      - jsonpath: "$.data.complexTaskEntries[0].complexTaskId"
+        operator: is
+        targetvalue: "6522c383-36cc-4f4d-9089-19b4dcad70f5"
+      - jsonpath: "$.data.complexTaskEntries[0].entryDate"
+        operator: is
+        targetvalue: "2026-08-20"
+      - jsonpath: "$.data.complexTaskEntries[0].timezone"
+        operator: is
+        targetvalue: "America/Chicago"
+
+  - name: complexInvoices
+    synthetic_data:
+      - key: DEV_COMPLEX_JOB_ID
+        value: "d3484afb-b2cd-455b-b353-f745c5fa4d21"
+        purpose: "complexJobId filter for complexInvoices(filters: { complexJobId }) — same synthetic job as complexJob query"
+        where_to_set: Terraform global DEV_COMPLEX_JOB_ID
+        format: ID
+    notes: complexInvoices(filters) by complexJobId. Returns invoices for the synthetic job; asserts first invoice and job details.
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+    assertions:
+      - jsonpath: "$.data.complexInvoices[0].id"
+        operator: is
+        targetvalue: "32662958-039f-4f36-90bb-5a4364e9c807"
+      - jsonpath: "$.data.complexInvoices[0].accountId"
+        operator: is
+        targetvalue: "dfb43473-e136-4ede-971f-3238b18d1f8b"
+      - jsonpath: "$.data.complexInvoices[0].status"
+        operator: is
+        targetvalue: "READY_TO_APPROVE"
+      - jsonpath: "$.data.complexInvoices[0].job.id"
+        operator: is
+        targetvalue: "d3484afb-b2cd-455b-b353-f745c5fa4d21"
+      - jsonpath: "$.data.complexInvoices[0].job.name"
+        operator: is
+        targetvalue: "Datadog Synthetic Data (DON'T DELETE)"
+      - jsonpath: "$.data.complexInvoices[0].job.customer.name"
+        operator: is
+        targetvalue: "Datadog"
+
+  - name: complexTasksForUser
+    synthetic_data:
+      - key: DEV_COMPLEX_TASKS_FOR_USER_START_DATE
+        value: "2026-02-16"
+        purpose: startDate for complexTasksForUser(filters) date range
+        where_to_set: Terraform global DEV_COMPLEX_TASKS_FOR_USER_START_DATE
+        format: Date (YYYY-MM-DD)
+      - key: DEV_COMPLEX_TASKS_FOR_USER_END_DATE
+        value: "2026-02-22"
+        purpose: endDate for complexTasksForUser(filters) date range
+        where_to_set: Terraform global DEV_COMPLEX_TASKS_FOR_USER_END_DATE
+        format: Date (YYYY-MM-DD)
+    notes: complexTasksForUser(filters) with startDate/endDate. Returns tasks for the authenticated user; asserts synthetic task in first result.
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+    assertions:
+      - jsonpath: "$.data.complexTasksForUser[0].id"
+        operator: is
+        targetvalue: "0468532f-bc99-42b9-9fa6-f1b0cd87789d"
+      - jsonpath: "$.data.complexTasksForUser[0].name"
+        operator: is
+        targetvalue: "Datadog Synthetic Data (DON'T DELETE)"
+      - jsonpath: "$.data.complexTasksForUser[0].status"
+        operator: is
+        targetvalue: "SCHEDULED"
+      - jsonpath: "$.data.complexTasksForUser[0].accountId"
+        operator: is
+        targetvalue: "dfb43473-e136-4ede-971f-3238b18d1f8b"
