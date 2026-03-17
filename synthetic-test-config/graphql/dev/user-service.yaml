@@ -1,5 +1,6 @@
 # GraphQL synthetic data for User service — DEV only.
 # Schema: docs/synthetic-test-config-schema.md
+# User Service schema reference: docs/user-management-service-schema.md
 
 scope: graphql
 environment: dev
@@ -7,4 +8,27 @@ service: User service
 graph: Dev-UserService
 terraform_file: environments/dev/graphql_user_service.tf
 
-queries: []
+queries:
+  - name: userSystemCheck
+    synthetic_data: []
+    notes: Health check; optional input checkLaunchDarkly, checkSQL. No variables required.
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+    assertions:
+      - jsonpath: "$.data.userSystemCheck.message"
+        operator: is
+        targetvalue: "User Service is Running!"
+      - jsonpath: "$.data.userSystemCheck.launchDarklyStatus"
+        operator: is
+        targetvalue: "OK"
+      - jsonpath: "$.data.userSystemCheck.sqlStatus"
+        operator: is
+        targetvalue: "OK"
+      - jsonpath: "$.data.userSystemCheck.minimumAndroidVersion"
+        operator: is
+        targetvalue: "0.0.2"
+      - jsonpath: "$.data.userSystemCheck.minimumIOSVersion"
+        operator: is
+        targetvalue: "1.1.18"
