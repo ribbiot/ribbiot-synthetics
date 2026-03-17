@@ -1,9 +1,9 @@
 # Required synthetic data
 
-This doc summarizes **where** we document required synthetic test config (data, locations, assertions). The canonical list is in **[synthetic-test-config/](../synthetic-test-config/)**. GraphQL tests use **synthetic-test-config/graphql/<env>/** (one YAML per service per environment), with per-query synthetic_data, implemented, locations, and assertions.
+This doc summarizes **where** we document required synthetic test config (data, locations, assertions). The canonical list is in **[synthetic-test-config/](../synthetic-test-config/)**. GraphQL tests use **synthetic-test-config/graphql/<env>/** (one YAML per service per environment), with per-query synthetic_data, locations, and assertions.
 
 - **synthetic-test-config/README.md** — Purpose, layout (graphql scope), and how to derive assertions from a response.
-- **synthetic-test-config/graphql/dev/asset-service.yaml** — Asset service (dev): queries, synthetic_data, implemented, locations, assertions.
+- **synthetic-test-config/graphql/dev/asset-service.yaml** — Asset service (dev): queries, synthetic_data, locations, assertions.
 - **synthetic-test-config/graphql/prod/asset-service.yaml** — Asset service (prod): same structure, prod-specific values.
 - **synthetic-test-config/graphql/dev/job-service.yaml** (and prod) — Job service (placeholder until populated).
 - **synthetic-test-config/graphql/dev/user-service.yaml** (and prod) — User service (placeholder).

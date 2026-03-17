@@ -42,7 +42,7 @@ alwaysApply: false
 
 ## Options
 
-- `options_list { tick_every = 300; retry { count = 2, interval = 300 } }` (or env-appropriate values).
+- `options_list { tick_every = var.default_frequency; retry { count = 2, interval = 300 } }`. Framework default is 7200 (2 hours); override via tfvars if needed.
 
 ## Adding a new GraphQL query
 

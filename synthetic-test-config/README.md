@@ -1,6 +1,6 @@
 # Synthetic data
 
-This folder is the **source of truth** for GraphQL synthetic tests: input data to inject, which geos each test runs in, whether a test is implemented, and assertions on responses. **Dev and prod are in separate files** so the data you supply for dev (e.g. dev account IDs, task IDs) stays distinct from prod.
+This folder is the **source of truth** for GraphQL synthetic tests: input data to inject, which geos each test runs in, and assertions on responses. **Dev and prod are in separate files** so the data you supply for dev (e.g. dev account IDs, task IDs) stays distinct from prod.
 
 ## Scope and layout
 
@@ -11,8 +11,8 @@ This folder is the **source of truth** for GraphQL synthetic tests: input data t
 ## Purpose
 
 - **Input data** — Set `key` and `value` in `synthetic_data` per env. `npm run tfvars:from-synthetic-test-config` writes `environments/<env>/synthetic-test-config.auto.tfvars.json` for each env so Terraform doesn’t need variables set by hand.
-- **Geos** — `locations` on each query lists Datadog location IDs (e.g. `aws:us-east-1`) for that query in that env.
-- **On/off** — `implemented` is whether a synthetic test exists in Terraform for that query in that env.
+- **Geos** — `locations` on each query lists Datadog location IDs. **Framework default** (cost control): use `aws:us-east-1`, `aws:us-west-2`, `gcp:us-west1` unless a test needs different geos.
+- **Excluded** — Set `excluded: true` on a query to omit it from Terraform test generation only (e.g. endpoint unused or unreliable data). Excluded queries’ synthetic_data is still written to tfvars so existing Datadog globals are not destroyed.
 - **Assertions** — `assertions` lists JSONPath checks (jsonpath, operator, targetvalue) to apply to the GraphQL response. You can derive these from a sample response (see below).
 
 ## Files (GraphQL, per environment)
@@ -50,7 +50,7 @@ Run:
 npm run tfvars:from-synthetic-test-config
 ```
 
-This reads **`synthetic-test-config/graphql/dev/*.yaml`** and **`synthetic-test-config/graphql/prod/*.yaml`**, collects all `synthetic_data[].key`/`value` per env (skipping empty placeholders), and writes:
+This reads **`synthetic-test-config/graphql/dev/*.yaml`** and **`synthetic-test-config/graphql/prod/*.yaml`**, collects all `synthetic_data[].key`/`value` per env (skipping empty placeholders; excluded queries still emit values so globals are kept), and writes:
 
 - `environments/dev/synthetic-test-config.auto.tfvars.json`
 - `environments/prod/synthetic-test-config.auto.tfvars.json`

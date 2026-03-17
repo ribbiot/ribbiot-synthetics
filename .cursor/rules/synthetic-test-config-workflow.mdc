@@ -42,16 +42,17 @@ The framework is **config-first**. The user supplies a **working GraphQL request
    - Prefer assertions on stable, meaningful fields (e.g. message, status, first element of a list). Omit or relax flaky or highly variable values (timestamps, IDs that change).
 
 4. **Query entry shape**
-   - Ensure the query has: `name`, `synthetic_data` (from step 2), `implemented` (set to `false` until a Terraform test exists for it; `true` if we're only updating config for an existing test), optional `locations`, optional `notes`, and `assertions` (from step 3).
+   - Ensure the query has: `name`, `synthetic_data` (from step 2), optional `locations`, optional `notes`, and `assertions` (from step 3).
+   - **Default run policy (cost control):** Use `locations: [aws:us-east-1, aws:us-west-2, gcp:us-west1]` and Terraform default frequency 7200 (2 hours). Do not add more geos or higher frequency unless the user explicitly asks.
    - If the query is new in the file, add a full entry following the schema in `docs/synthetic-test-config-schema.md`.
 
 5. **Tell the user what to run**
    - "Run `npm run tfvars:from-synthetic-test-config` to regenerate Terraform variable files from the config, then `npm run tf:plan:dev` to preview and `npm run tf:apply:dev` to apply to Datadog."
-   - If they added a **new** test (new query with `implemented: true`), note that the Terraform test resource itself still needs to be added in `environments/dev/graphql_asset_service.tf` (or the right service); the config supplies the **data and assertions**, but the test definition (steps, name, locations) is still in Terraform until we automate that.
+   - If they added a **new** test (new query **without** `excluded: true`), add the Terraform test resource in `environments/dev/graphql_asset_service.tf` (or the right service). **Never** add a Terraform resource for a query that has `excluded: true`; if a query is set to excluded, remove its `datadog_synthetics_test` resource and related locals so no test is created in Datadog.
 
 ## Schema and scripts
 
-- **Schema**: `docs/synthetic-test-config-schema.md` — full YAML shape (scope, environment, queries[].synthetic_data, implemented, locations, assertions).
+- **Schema**: `docs/synthetic-test-config-schema.md` — full YAML shape (scope, environment, queries[].synthetic_data, locations, assertions).
 - **Config location**: `synthetic-test-config/graphql/<env>/<service>.yaml` — one file per service per environment; no shared file for dev and prod.
 - **Derive assertions**: `scripts/derive-assertions-from-response.ts` — input a JSON response file (or stdin), optional `--query <name>`, outputs YAML `assertions:` snippet. Use `--terraform` to get Terraform local value format.
 - **Tfvars**: `scripts/synthetic-test-config-to-tfvars.ts` — reads all `synthetic-test-config/graphql/<env>/*.yaml`, collects `synthetic_data[].key`/`value`, writes `environments/<env>/synthetic-test-config.auto.tfvars.json`. Run via `npm run tfvars:from-synthetic-test-config` (or `--env dev` / `--env prod`).

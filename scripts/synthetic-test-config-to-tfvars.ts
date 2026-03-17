@@ -28,6 +28,8 @@ interface SyntheticDataItem {
 interface QueryEntry {
   name?: string;
   synthetic_data?: SyntheticDataItem[];
+  /** When true, this query is omitted from tfvars and Terraform test generation (e.g. endpoint unused or data unreliable). */
+  excluded?: boolean;
 }
 
 interface ServiceDoc {
@@ -44,6 +46,7 @@ function readYamlDir(dir: string): string[] {
 function collectValuesFromDoc(doc: ServiceDoc, values: Record<string, string>): void {
   if (!doc?.queries) return;
   for (const q of doc.queries) {
+    // Excluded queries: still emit synthetic_data so existing Datadog globals are not destroyed (tests may still reference them).
     for (const item of q.synthetic_data ?? []) {
       const key = item.key;
       if (key == null || key === "(input)" || item.value === undefined) continue;

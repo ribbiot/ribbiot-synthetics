@@ -10,6 +10,15 @@ This repository defines and manages **Datadog Synthetic API tests** using Terraf
 - **Secrets-safe**: Credentials are supplied via environment variables or non-committed tfvars; nothing sensitive is stored in git.
 - **CI/CD-ready**: Structure supports plan/apply in pipelines (e.g. GitHub Actions, GitLab CI).
 
+## Default run policy (cost control)
+
+To avoid runaway spend, **new synthetics default to**:
+
+- **3 locations**: `aws:us-east-1`, `aws:us-west-2`, `gcp:us-west1`
+- **Frequency**: every **2 hours** (7200 seconds)
+
+These are set in `environments/dev/variables.tf` as `default_locations` and `default_frequency`. Override per env via `terraform.tfvars` or `-var` if you need more geos or a different interval. GraphQL asset tests use these defaults; other services (Job, User, Timecard, Railway) can be switched to them when tuned.
+
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/) (v18+) and npm — for `npm run` scripts (branch creation, Terraform helpers)

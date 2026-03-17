@@ -21,16 +21,17 @@ variable "dd_api_url" {
   default     = "https://api.us5.datadoghq.com"
 }
 
+# Default run policy: 3 geos, every 2 hours, to prevent runaway spend. Override via tfvars if needed.
 variable "default_locations" {
-  description = "Default list of synthetic test locations (e.g. aws:us-east-1)."
+  description = "Default synthetic test locations. Framework default: 3 geos (us-east-1, us-west-2, gcp us-west1)."
   type        = list(string)
-  default     = ["aws:us-east-1"]
+  default     = ["aws:us-east-1", "aws:us-west-2", "gcp:us-west1"]
 }
 
 variable "default_frequency" {
-  description = "Default test run frequency in seconds."
+  description = "Default test run frequency in seconds. Framework default: 7200 (2 hours)."
   type        = number
-  default     = 300
+  default     = 7200
 }
 
 # ------------------------------------------------------------------------------

@@ -36,7 +36,7 @@ module "railway_health_check" {
   status    = "live"
   message   = local.railway_alert_message
   locations = local.railway_test_locations
-  frequency = 60 # 1 minute
+  frequency = var.default_frequency
   tags      = local.base_tags
 
   request_url    = "https://ribbiot-router-prod.up.railway.app/health"

@@ -114,7 +114,7 @@ resource "datadog_synthetics_test" "auth0_graphql_job_system_check_dev" {
   }
 
   options_list {
-    tick_every = 300
+    tick_every = var.default_frequency
     retry {
       count    = 2
       interval = 300

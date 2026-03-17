@@ -1,6 +1,6 @@
 # Synthetic Test Config Schema (GraphQL)
 
-This doc describes the YAML schema for **graphql** synthetic test config (data, locations, implemented, assertions). The same repo may later use a different structure for other backends (e.g. Supabase).
+This doc describes the YAML schema for **graphql** synthetic test config (data, locations, assertions). The same repo may later use a different structure for other backends (e.g. Supabase).
 
 ## Scope and layout
 
@@ -28,10 +28,10 @@ Each item in `queries` has (all per-environment, since the file is already for o
 | Key | Required | Description |
 |-----|----------|-------------|
 | `name` | Yes | GraphQL query name (e.g. `assetSystemCheck`, `scheduledAssetsForTasks`) |
-| `synthetic_data` | No | List of input data items (key, value, purpose, where_to_set, format). Values are injected as Terraform globals for this env. |
+| `excluded` | No | When `true`, this query must **not** have a `datadog_synthetics_test` resource in Terraform and must not be created in Datadog. Its `synthetic_data` is still emitted to tfvars so existing globals are not destroyed. Default `false`. |
+| `synthetic_data` | No | List of input data items (key, value, purpose, where_to_set, format). Values are injected as Terraform globals for this env. Emitted for all queries (including excluded) so globals stay in sync. |
 | `notes` | No | Free-form notes. |
-| `implemented` | Yes | Whether a synthetic test exists in Terraform for this query in this env (`true` / `false`) |
-| `locations` | No | List of Datadog location IDs (e.g. `["aws:us-east-1", "aws:ca-central-1"]`). If omitted, Terraform uses the env default. |
+| `locations` | No | List of Datadog location IDs. **Framework default** (cost control): `["aws:us-east-1", "aws:us-west-2", "gcp:us-west1"]`. If omitted, Terraform uses the env default. |
 | `assertions` | No | List of body assertions (JSONPath) to apply to the GraphQL response. See [Assertions](#assertions). |
 
 ## Synthetic data item
@@ -83,7 +83,6 @@ queries:
   - name: assetSystemCheck
     synthetic_data: []
     notes: No extra data.
-    implemented: true
     locations:
       - aws:us-east-1
       - aws:ca-central-1
@@ -102,7 +101,6 @@ queries:
         purpose: Account ID for presigned upload URL
         where_to_set: Terraform global DEV_ASSET_ACCOUNT_ID
         format: ID
-    implemented: true
     locations:
       - aws:ca-central-1
 ```
@@ -112,5 +110,5 @@ queries:
 ## Relationship to Terraform
 
 - **Values:** `npm run tfvars:from-synthetic-test-config` reads `synthetic-test-config/graphql/<env>/*.yaml` for each env, collects all `synthetic_data[].key`/`value` (skipping empty placeholders), and writes `environments/<env>/synthetic-test-config.auto.tfvars.json`. Terraform in that env uses `var.synthetic_data_values` and creates Datadog globals. Use `--env dev` or `--env prod` to generate only one env.
-- **Implemented / locations:** Today Terraform still defines tests and locations in HCL. The YAML is the source of truth for *what* should be on and *where*; future work can drive Terraform test creation and `locations` from these files (e.g. codegen or a provider).
+- **Locations:** Today Terraform still defines tests and locations in HCL. The YAML is the source of truth for *where* tests run; future work can drive Terraform test creation and `locations` from these files (e.g. codegen or a provider).
 - **Assertions:** Assertions in YAML can be copy-pasted into Terraform `locals` or a future codegen step can emit Terraform assertion blocks from the YAML.
