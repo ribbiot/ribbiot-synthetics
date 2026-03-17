@@ -4,7 +4,12 @@
   "private": true,
   "description": "Datadog Synthetic API tests as code with Terraform; npm scripts for branch creation and Terraform workflows.",
   "scripts": {
-    "new-branch": "tsx scripts/new-branch.ts",
+    "mcp:auth": "dotenv -e .env -- tsx scripts/get-auth0-token.ts",
+    "mcp:select-schema": "tsx scripts/select-schema.ts",
+    "mcp:schema": "dotenv -e .env -- tsx scripts/fetch-graphql-schema.ts",
+    "mcp:start": "docker run --rm -p 8000:8000 -v \"$(pwd)/config:/data\" -e APOLLO_GRAPHQL_ENDPOINT -e APOLLO_MCP_HEADERS ghcr.io/apollographql/apollo-mcp-server:latest /data/apollo-mcp.yaml",
+    "mcp:start:auth": "dotenv -e .env -- tsx scripts/mcp-start-with-auth.ts",
+    "new:branch": "tsx scripts/new-branch.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "tf:init:dev": "dotenv -e .env -- bash -c 'cd environments/dev && terraform init -input=false'",
@@ -14,17 +19,22 @@
     "tf:apply:dev": "dotenv -e .env -- bash -c 'cd environments/dev && terraform init -input=false && terraform apply -input=false -auto-approve'",
     "tf:apply:prod": "dotenv -e .env -- bash -c 'cd environments/prod && terraform init -input=false && terraform apply -input=false -auto-approve'",
     "tf:validate:dev": "dotenv -e .env -- bash -c 'cd environments/dev && terraform validate'",
-    "tf:validate:prod": "dotenv -e .env -- bash -c 'cd environments/prod && terraform validate'"
+    "tf:validate:prod": "dotenv -e .env -- bash -c 'cd environments/prod && terraform validate'",
+    "tfvars:from-synthetic-test-config": "tsx scripts/synthetic-test-config-to-tfvars.ts",
+    "assertions:from-response": "tsx scripts/derive-assertions-from-response.ts"
   },
   "devDependencies": {
     "@types/inquirer": "^9.0.9",
     "@types/node": "^20.10.0",
     "@types/yargs": "^17.0.35",
+    "dotenv": "^16.3.1",
     "dotenv-cli": "^7.4.0",
+    "graphql": "^16.13.1",
     "inquirer": "^9.2.0",
     "tsx": "^4.7.0",
     "typescript": "^5.3.0",
     "vitest": "^1.2.0",
+    "yaml": "^2.8.2",
     "yargs": "^17.7.2"
   }
 }

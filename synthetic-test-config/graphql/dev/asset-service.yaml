@@ -1,0 +1,195 @@
+# GraphQL synthetic data for Asset inventory service — DEV only.
+# Schema: docs/synthetic-test-config-schema.md
+# Data and config here are for dev; prod uses graphql/prod/asset-service.yaml.
+
+scope: graphql
+environment: dev
+service: Asset inventory service
+graph: Dev-AssetService
+terraform_file: environments/dev/graphql_asset_service.tf
+
+queries:
+  - name: assetSystemCheck
+    synthetic_data: []
+    notes: No extra data.
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+    assertions:
+      - jsonpath: "$.data.assetSystemCheck.message"
+        operator: is
+        targetvalue: "Asset Service is Running!"
+      - jsonpath: "$.data.assetSystemCheck.launchDarklyStatus"
+        operator: is
+        targetvalue: "OK"
+      - jsonpath: "$.data.assetSystemCheck.sqlStatus"
+        operator: is
+        targetvalue: "OK"
+
+  - name: getAssetImportUploadPresignedUrl
+    synthetic_data:
+      - key: DEV_ASSET_ACCOUNT_ID
+        value: "dfb43473-e136-4ede-971f-3238b18d1f8b"
+        purpose: Account ID for presigned upload URL
+        where_to_set: Terraform global DEV_ASSET_ACCOUNT_ID
+        format: ID
+    notes: Returns a presigned S3 upload URL string. Assertion checks that the value looks like a URL.
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+    assertions:
+      - jsonpath: "$.data.getAssetImportUploadPresignedUrl"
+        operator: contains
+        targetvalue: "https://"
+
+  - name: listMeasureUnits
+    synthetic_data: []
+    notes: Validates list of measure units (name, symbol, type, measureGroup). No request variables.
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+    assertions:
+      - jsonpath: "$.data.listMeasureUnits[0].name"
+        operator: is
+        targetvalue: "Litre"
+      - jsonpath: "$.data.listMeasureUnits[0].symbol"
+        operator: is
+        targetvalue: "litre"
+      - jsonpath: "$.data.listMeasureUnits[0].type"
+        operator: is
+        targetvalue: "VOLUME"
+      - jsonpath: "$.data.listMeasureUnits[0].measureGroup"
+        operator: is
+        targetvalue: "METRIC"
+
+  - name: assetTemplates
+    excluded: true
+    synthetic_data: []
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+
+  - name: baseAssetTemplates
+    excluded: true
+    synthetic_data: []
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+
+  - name: assets
+    excluded: true
+    synthetic_data: []
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+
+  - name: assetTemplate
+    excluded: true
+    synthetic_data:
+      - key: DEV_ASSET_TEMPLATE_ID
+        purpose: Asset template ID for assetTemplate(id) query
+        where_to_set: TBD (e.g. Terraform var + global variable)
+        format: ID
+    notes: Excluded from tfvars and test generation.
+
+  - name: baseAssetTemplate
+    excluded: true
+    synthetic_data:
+      - key: DEV_BASE_ASSET_TEMPLATE_ID
+        purpose: Base asset template ID for baseAssetTemplate(id) query
+        where_to_set: TBD
+        format: ID
+    notes: Excluded from tfvars and test generation.
+
+  - name: asset
+    excluded: true
+    synthetic_data:
+      - key: DEV_ASSET_ID
+        value: "62a755ac-b741-47da-82bd-b93103f3c2e6"
+        purpose: Asset ID for asset(id) query
+        where_to_set: Terraform var (e.g. dev_asset_id) → Datadog global DEV_ASSET_ID
+        format: ID
+    notes: Endpoint exists but is unused; data not reliable for synthetics. Excluded from tfvars and test generation.
+
+  - name: getAvailableAssetSchedule
+    excluded: true
+    synthetic_data:
+      - key: "(input)"
+        purpose: startDate (Date!), optional endDate, timezone, searchTerm, assetType, divisionId, branchId, etc.
+        where_to_set: TBD (e.g. config or vars per run)
+        format: AvailableAssetScheduleInput
+
+  - name: getAvailableAssetScheduleForTask
+    synthetic_data:
+      - key: DEV_AVAILABLE_ASSET_SCHEDULE_FOR_TASK_START_DATE
+        value: "2026-02-12T00:00:00.000Z"
+        purpose: startDate for getAvailableAssetScheduleForTask(input) — ISO 8601 date
+        where_to_set: Terraform global
+        format: DateTime
+      - key: DEV_AVAILABLE_ASSET_SCHEDULE_FOR_TASK_END_DATE
+        value: "2026-02-12T23:59:59.999Z"
+        purpose: endDate for getAvailableAssetScheduleForTask(input) — ISO 8601 date
+        where_to_set: Terraform global
+        format: DateTime
+      - key: DEV_AVAILABLE_ASSET_SCHEDULE_FOR_TASK_TIMEZONE
+        value: "America/Denver"
+        purpose: timezone for getAvailableAssetScheduleForTask(input)
+        where_to_set: Terraform global
+        format: IANA timezone
+    notes: >
+      Returns availability (asset, block, complexJobs) and pageInfo. block.timezone and complexJobs can be null. Assertions use first availability item and pageInfo.
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+    assertions:
+      - jsonpath: "$.data.getAvailableAssetScheduleForTask.availability[0].asset.assetName"
+        operator: is
+        targetvalue: "Chris' Engine Hour Pod 1"
+      - jsonpath: "$.data.getAvailableAssetScheduleForTask.availability[0].asset.assetStatus"
+        operator: is
+        targetvalue: "Available"
+      - jsonpath: "$.data.getAvailableAssetScheduleForTask.availability[0].asset.id"
+        operator: is
+        targetvalue: "0a2bf935-0a43-4ad7-b529-c2452e37c0a2"
+      - jsonpath: "$.data.getAvailableAssetScheduleForTask.pageInfo.hasNextPage"
+        operator: is
+        targetvalue: "true"
+
+  - name: scheduledAssetsForJobs
+    excluded: true
+    synthetic_data:
+      - key: "(input)"
+        purpose: jobInputs array with after, before (DateTime!), optional complexJobId
+        where_to_set: TBD
+        format: ScheduledAssetsForJobsInput
+
+  - name: scheduledAssetsForTasks
+    synthetic_data:
+      - key: DEV_SCHEDULED_ASSETS_TASK_IDS
+        value: ["0468532f-bc99-42b9-9fa6-f1b0cd87789d"]
+        purpose: "Task ID(s) for scheduledAssetsForTasks(input: { taskIds: [ID!]! })"
+        where_to_set: Terraform global DEV_SCHEDULED_ASSETS_TASK_IDS
+        format: JSON array of ID
+    notes: >
+      Response includes scheduledAssets (asset id, name, category, etc.) and overbookedAssets (complexTaskId, asset, complexJob). complexJob can be null; backend may return extensions.valueCompletion warnings for those. Assertions use taskId and first scheduled asset only.
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+    assertions:
+      - jsonpath: "$.data.scheduledAssetsForTasks[0].taskId"
+        operator: is
+        targetvalue: "0468532f-bc99-42b9-9fa6-f1b0cd87789d"
+      - jsonpath: "$.data.scheduledAssetsForTasks[0].scheduledAssets[0].asset.name"
+        operator: is
+        targetvalue: "Chris' Engine Hour Pod 1"
+      - jsonpath: "$.data.scheduledAssetsForTasks[0].scheduledAssets[0].asset.category"
+        operator: is
+        targetvalue: "Engine Hours Hardware"

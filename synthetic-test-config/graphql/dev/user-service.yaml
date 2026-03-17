@@ -1,0 +1,10 @@
+# GraphQL synthetic data for User service — DEV only.
+# Schema: docs/synthetic-test-config-schema.md
+
+scope: graphql
+environment: dev
+service: User service
+graph: Dev-UserService
+terraform_file: environments/dev/graphql_user_service.tf
+
+queries: []

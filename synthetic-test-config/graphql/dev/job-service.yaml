@@ -1,0 +1,15 @@
+# GraphQL synthetic data for Job service — DEV only.
+# Schema: docs/synthetic-test-config-schema.md
+
+scope: graphql
+environment: dev
+service: Job service
+graph: Dev-JobService
+terraform_file: environments/dev/graphql_job_service.tf
+
+queries: []
+# Add entries as you implement query synthetics, e.g.:
+#   - name: jobSystemCheck
+#     synthetic_data: []
+#     locations: ["aws:us-east-1"]
+#     assertions: [...]

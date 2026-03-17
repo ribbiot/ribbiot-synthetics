@@ -21,16 +21,17 @@ variable "dd_api_url" {
   default     = "https://api.us5.datadoghq.com"
 }
 
+# Default run policy: 3 geos, every 2 hours, to prevent runaway spend. Override via tfvars if needed.
 variable "default_locations" {
-  description = "Default list of synthetic test locations (e.g. aws:us-east-1)."
+  description = "Default synthetic test locations. Framework default: 3 geos (us-east-1, us-west-2, gcp us-west1)."
   type        = list(string)
-  default     = ["aws:us-east-1"]
+  default     = ["aws:us-east-1", "aws:us-west-2", "gcp:us-west1"]
 }
 
 variable "default_frequency" {
-  description = "Default test run frequency in seconds."
+  description = "Default test run frequency in seconds. Framework default: 7200 (2 hours)."
   type        = number
-  default     = 300
+  default     = 7200
 }
 
 # ------------------------------------------------------------------------------
@@ -61,11 +62,13 @@ variable "dev_client_secret" {
   sensitive   = true
 }
 
-# Optional: used by Asset Service query tests that need account-scoped data (e.g. getAssetImportUploadPresignedUrl).
-# Set when enabling those tests in graphql_asset_service.tf.
-variable "dev_asset_account_id" {
-  description = "Dev account ID for Asset Service query tests (e.g. getAssetImportUploadPresignedUrl). Leave empty until tuning."
-  type        = string
-  default     = ""
-  sensitive   = true
+# ------------------------------------------------------------------------------
+# Synthetic test config: values from synthetic-test-config/graphql/<env>/*.yaml, injected by script.
+# Run: npm run tfvars:from-synthetic-test-config (writes synthetic-test-config.auto.tfvars.json).
+# No need to set these by hand unless you override.
+# ------------------------------------------------------------------------------
+variable "synthetic_data_values" {
+  description = "Map of global variable name -> string value (e.g. DEV_ASSET_ACCOUNT_ID, DEV_SCHEDULED_ASSETS_TASK_IDS). Populated from synthetic-test-config/graphql/<env>/*.yaml via scripts/synthetic-test-config-to-tfvars.ts. Arrays in YAML are JSON-encoded as strings."
+  type        = map(string)
+  default     = {}
 }

@@ -1,0 +1,10 @@
+# GraphQL synthetic data for Job service — PROD only.
+# Schema: docs/synthetic-test-config-schema.md
+
+scope: graphql
+environment: prod
+service: Job service
+graph: Prod-JobService
+terraform_file: environments/prod/graphql_job_service.tf
+
+queries: []

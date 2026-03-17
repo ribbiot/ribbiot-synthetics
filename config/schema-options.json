@@ -1,0 +1,52 @@
+{
+  "graphRef": "Ribbiot-Serverless@dev-current",
+  "options": [
+    {
+      "id": "Dev-AssetService",
+      "label": "Asset Service",
+      "roverType": "subgraph",
+      "roverName": "Dev-AssetService",
+      "studioUrl": "https://studio.apollographql.com/graph/Ribbiot-Serverless/variant/dev-current/schema/sdl?selectedSchema=Dev-AssetService"
+    },
+    {
+      "id": "Dev-JobService",
+      "label": "Job Service",
+      "roverType": "subgraph",
+      "roverName": "Dev-JobService",
+      "studioUrl": "https://studio.apollographql.com/graph/Ribbiot-Serverless/variant/dev-current/schema/sdl?selectedSchema=Dev-JobService"
+    },
+    {
+      "id": "Dev-TimecardService",
+      "label": "Timecard Service",
+      "roverType": "subgraph",
+      "roverName": "Dev-TimecardService",
+      "studioUrl": "https://studio.apollographql.com/graph/Ribbiot-Serverless/variant/dev-current/schema/sdl?selectedSchema=Dev-TimecardService"
+    },
+    {
+      "id": "Dev-UserService",
+      "label": "User Service",
+      "roverType": "subgraph",
+      "roverName": "Dev-UserService",
+      "studioUrl": "https://studio.apollographql.com/graph/Ribbiot-Serverless/variant/dev-current/schema/sdl?selectedSchema=Dev-UserService"
+    },
+    {
+      "id": "Dev-UserService-Public",
+      "label": "User Service (Public)",
+      "roverType": "subgraph",
+      "roverName": "Dev-UserService-Public",
+      "studioUrl": "https://studio.apollographql.com/graph/Ribbiot-Serverless/variant/dev-current/schema/sdl?selectedSchema=Dev-UserService-Public"
+    },
+    {
+      "id": "supergraph",
+      "label": "Supergraph (composed)",
+      "roverType": "supergraph",
+      "studioUrl": "https://studio.apollographql.com/graph/Ribbiot-Serverless/variant/dev-current/schema/sdl?selectedSchema=%23%40%21supergraph%21%40%23"
+    },
+    {
+      "id": "api",
+      "label": "API (public schema)",
+      "roverType": "supergraph",
+      "studioUrl": "https://studio.apollographql.com/graph/Ribbiot-Serverless/variant/dev-current/schema/sdl?selectedSchema=%23%40%21api%21%40%23"
+    }
+  ]
+}

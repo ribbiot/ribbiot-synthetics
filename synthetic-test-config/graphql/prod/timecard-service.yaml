@@ -1,0 +1,10 @@
+# GraphQL synthetic data for Timecard service — PROD only.
+# Schema: docs/synthetic-test-config-schema.md
+
+scope: graphql
+environment: prod
+service: Timecard service
+graph: Prod-TimecardService
+terraform_file: environments/prod/graphql_timecard_service.tf
+
+queries: []
