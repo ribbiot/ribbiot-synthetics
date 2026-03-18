@@ -149,13 +149,13 @@ queries:
       - aws:us-west-2
       - gcp:us-west1
     assertions:
-      - jsonpath: "$.data.getAvailableAssetScheduleForTask.availability[0].asset.assetName"
+      - jsonpath: "$.data.getAvailableAssetScheduleForTask.availability[2].asset.assetName"
         operator: is
         targetvalue: "Chris' Engine Hour Pod 1"
-      - jsonpath: "$.data.getAvailableAssetScheduleForTask.availability[0].asset.assetStatus"
+      - jsonpath: "$.data.getAvailableAssetScheduleForTask.availability[2].asset.assetStatus"
         operator: is
         targetvalue: "Available"
-      - jsonpath: "$.data.getAvailableAssetScheduleForTask.availability[0].asset.id"
+      - jsonpath: "$.data.getAvailableAssetScheduleForTask.availability[2].asset.id"
         operator: is
         targetvalue: "0a2bf935-0a43-4ad7-b529-c2452e37c0a2"
       - jsonpath: "$.data.getAvailableAssetScheduleForTask.pageInfo.hasNextPage"
