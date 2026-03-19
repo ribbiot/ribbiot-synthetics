@@ -29,9 +29,9 @@ variable "default_locations" {
 }
 
 variable "default_frequency" {
-  description = "Default test run frequency in seconds. Framework default: 7200 (2 hours)."
+  description = "Default test run frequency in seconds. 604800 = once per week; 86400 = once/day; 7200 = every 2 hours."
   type        = number
-  default     = 7200
+  default     = 604800
 }
 
 # ------------------------------------------------------------------------------

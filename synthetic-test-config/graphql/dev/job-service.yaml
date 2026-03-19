@@ -1,8 +1,3 @@
-# GraphQL synthetic data for Job service — DEV only.
-# Schema: docs/synthetic-test-config-schema.md
-# Source of truth for Query names: Apollo Studio Dev-JobService
-# https://studio.apollographql.com/graph/Ribbiot-Serverless/variant/dev-current/schema/sdl?selectedSchema=Dev-JobService
-
 scope: graphql
 environment: dev
 service: Job service

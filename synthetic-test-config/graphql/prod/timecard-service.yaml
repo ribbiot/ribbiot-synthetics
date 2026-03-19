@@ -1,5 +1,6 @@
 # GraphQL synthetic data for Timecard service — PROD only.
 # Schema: docs/synthetic-test-config-schema.md
+# Timecard schema: docs/timecard-schema-and-synthetic-config.md
 
 scope: graphql
 environment: prod
@@ -7,4 +8,140 @@ service: Timecard service
 graph: Prod-TimecardService
 terraform_file: environments/prod/graphql_timecard_service.tf
 
-queries: []
+queries:
+  - name: timecardSystemCheck
+    synthetic_data: []
+    notes: Health check; no extra data.
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+    assertions:
+      - jsonpath: "$.data.timecardSystemCheck.message"
+        operator: is
+        targetvalue: "Timecard system is up and running!"
+      - jsonpath: "$.data.timecardSystemCheck.launchDarklyStatus"
+        operator: is
+        targetvalue: "OK"
+      - jsonpath: "$.data.timecardSystemCheck.sqlStatus"
+        operator: is
+        targetvalue: "OK"
+
+  # --- Stubbed queries: set excluded: false and add value/assertions when ready ---
+
+  - name: formTemplate
+    excluded: true
+    synthetic_data:
+      - key: PROD_TIMECARD_FORM_TEMPLATE_ID
+        purpose: Form template ID for formTemplate(id) query
+        where_to_set: Terraform global PROD_TIMECARD_FORM_TEMPLATE_ID
+        format: ID
+    notes: Stub.
+
+  - name: formTemplates
+    excluded: true
+    synthetic_data:
+      - key: PROD_TIMECARD_ACCOUNT_ID
+        purpose: Account ID for formTemplates(accountId, filters?)
+        where_to_set: Terraform global PROD_TIMECARD_ACCOUNT_ID
+        format: ID
+    notes: Stub.
+
+  - name: formSubmission
+    excluded: true
+    synthetic_data:
+      - key: PROD_TIMECARD_FORM_SUBMISSION_ID
+        purpose: Form submission ID for formSubmission(id) query
+        where_to_set: Terraform global PROD_TIMECARD_FORM_SUBMISSION_ID
+        format: ID
+    notes: Stub.
+
+  - name: formSubmissions
+    excluded: true
+    synthetic_data:
+      - key: PROD_TIMECARD_FORM_ID_FOR_SUBMISSIONS
+        purpose: formId for formSubmissions(filters)
+        where_to_set: Terraform global
+        format: ID
+    notes: Stub.
+
+  - name: formSubmissionsForInvoice
+    excluded: true
+    synthetic_data:
+      - key: PROD_TIMECARD_INVOICE_START_DATE
+        purpose: startDate for formSubmissionsForInvoice(filters)
+        where_to_set: Terraform global
+        format: Date
+      - key: PROD_TIMECARD_INVOICE_JOB_NUMBER
+        purpose: jobNumber for formSubmissionsForInvoice(filters)
+        where_to_set: Terraform global
+        format: String
+    notes: Stub.
+
+  - name: userFormSubmissions
+    excluded: true
+    synthetic_data:
+      - key: PROD_TIMECARD_USER_FORM_IDS
+        purpose: formIds for userFormSubmissions(filters)
+        where_to_set: Terraform global (JSON array of ID)
+        format: JSON array of ID
+    notes: Stub.
+
+  - name: formPDFConfig
+    excluded: true
+    synthetic_data:
+      - key: PROD_TIMECARD_FORM_ID_FOR_PDF_CONFIG
+        purpose: formId for formPDFConfig(formId)
+        where_to_set: Terraform global
+        format: ID
+    notes: Stub.
+
+  - name: formType
+    excluded: true
+    synthetic_data:
+      - key: PROD_TIMECARD_FORM_TYPE_SLUG
+        purpose: slug for formType(slug)
+        where_to_set: Terraform global
+        format: String
+    notes: Stub.
+
+  - name: formTypes
+    excluded: true
+    synthetic_data: []
+    notes: Stub. No arguments.
+
+  - name: formTypeAccount
+    excluded: true
+    synthetic_data:
+      - key: PROD_TIMECARD_FORM_TYPE_SLUG
+        purpose: formTypeSlug for formTypeAccount
+        where_to_set: Terraform global
+        format: String
+      - key: PROD_TIMECARD_ACCOUNT_ID
+        purpose: accountId for formTypeAccount
+        where_to_set: Terraform global PROD_TIMECARD_ACCOUNT_ID
+        format: ID
+    notes: Stub.
+
+  - name: formTypeAccounts
+    excluded: true
+    synthetic_data:
+      - key: PROD_TIMECARD_ACCOUNT_ID
+        purpose: accountId for formTypeAccounts(accountId)
+        where_to_set: Terraform global PROD_TIMECARD_ACCOUNT_ID
+        format: ID
+    notes: Stub.
+
+  - name: formTemplateHomePage
+    excluded: true
+    synthetic_data: []
+    notes: Stub. Optional accountId.
+
+  - name: formTemplateNotificationConfig
+    excluded: true
+    synthetic_data:
+      - key: PROD_TIMECARD_FORM_TEMPLATE_ID
+        purpose: formTemplateId for formTemplateNotificationConfig(formTemplateId!) when prod test is enabled
+        where_to_set: Terraform global PROD_TIMECARD_FORM_TEMPLATE_ID
+        format: ID
+    notes: Stub. Enable when prod template ID and expected shape (or null) are known.

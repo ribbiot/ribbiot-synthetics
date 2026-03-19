@@ -1,7 +1,3 @@
-# GraphQL synthetic data for User service — DEV only.
-# Schema: docs/synthetic-test-config-schema.md
-# User Service schema reference: docs/user-management-service-schema.md
-
 scope: graphql
 environment: dev
 service: User service

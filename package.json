@@ -7,6 +7,7 @@
     "mcp:auth": "dotenv -e .env -- tsx scripts/get-auth0-token.ts",
     "mcp:select-schema": "tsx scripts/select-schema.ts",
     "mcp:schema": "dotenv -e .env -- tsx scripts/fetch-graphql-schema.ts",
+    "mcp:schema:timecard": "dotenv -e .env -- tsx scripts/fetch-graphql-schema.ts --schema=Dev-TimecardService",
     "mcp:start": "docker run --rm -p 8000:8000 -v \"$(pwd)/config:/data\" -e APOLLO_GRAPHQL_ENDPOINT -e APOLLO_MCP_HEADERS ghcr.io/apollographql/apollo-mcp-server:latest /data/apollo-mcp.yaml",
     "mcp:start:auth": "dotenv -e .env -- tsx scripts/mcp-start-with-auth.ts",
     "new:branch": "tsx scripts/new-branch.ts",

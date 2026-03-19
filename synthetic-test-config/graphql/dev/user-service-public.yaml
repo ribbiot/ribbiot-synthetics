@@ -1,8 +1,3 @@
-# GraphQL synthetic config for User service (Public) — DEV only.
-# Public endpoints: no Auth0; single-step POST to /graphql.
-# Schema: docs/synthetic-test-config-schema.md
-# User Service Public schema: docs/user-management-service-schema.md (§5)
-
 scope: graphql
 environment: dev
 service: User service (Public)

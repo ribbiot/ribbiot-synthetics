@@ -24,7 +24,7 @@ Reference: [Apollo MCP Server docs](https://www.apollographql.com/docs/apollo-mc
 
 ## How Apollo MCP Server supports this
 
-Apollo MCP Server can expose **introspection tools** in addition to (or instead of) fixed operation tools:
+The MCP server **does not fetch the schema from Studio**. It reads the **local schema file** `config/schema.graphql` (mounted as `/data/schema.graphql` in Docker). You populate that file by running the schema fetch script (Rover) **before** starting the MCP server — e.g. `npm run mcp:schema:timecard` for the Timecard subgraph, or `npm run mcp:select-schema` then `npm run mcp:schema` for the selected subgraph. Once `config/schema.graphql` is set, the MCP server exposes **introspection tools**:
 
 | Tool       | Purpose |
 |-----------|---------|
@@ -45,11 +45,11 @@ The project includes config and scripts so you can run the Apollo MCP server and
 
 ### 1. (Optional) Choose a federated schema
 
-The dev graph is federated (Asset, Job, Timecard, User services, plus supergraph/API). To target one schema at a time:
+The dev graph is federated (Asset, Job, Timecard, User services, plus supergraph/API). To get a **single subgraph schema** into `config/schema.graphql` (so MCP introspect/search see only that service):
 
-- Run **`npm run mcp:select-schema`** and pick the schema you want to implement synthetics for (e.g. Asset Service, User Service, or Supergraph).
-- Your choice is stored in `config/selected-schema.json` (gitignored). When you run **`npm run mcp:schema`** or **`mcp:start:auth`**, the fetch step will use **Rover** to get that subgraph/supergraph schema from GraphOS if **APOLLO_KEY** (and optionally **APOLLO_GRAPH_REF**) is set; otherwise it introspects the router (full API).
-- Schema options and Studio SDL links are in `config/schema-options.json`. You can add or edit options there.
+- **Timecard only:** Run **`npm run mcp:schema:timecard`** (requires `APOLLO_KEY` and Rover). Then start the MCP server; Cursor will see the Timecard subgraph schema.
+- **Any other:** Run **`npm run mcp:select-schema`** and pick the schema (e.g. Asset Service, User Service, or Supergraph). Your choice is stored in `config/selected-schema.json` (gitignored). Then run **`npm run mcp:schema`** — it uses **Rover** to fetch that subgraph/supergraph from GraphOS if **APOLLO_KEY** is set; otherwise it introspects the router (full composed API).
+- To fetch a specific schema without changing the selection: **`npm run mcp:schema -- --schema=Dev-TimecardService`** (ids in `config/schema-options.json`).
 
 ### 2. Variables
 
