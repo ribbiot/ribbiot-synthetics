@@ -4,9 +4,6 @@
  * If you ran mcp:select-schema and chose a subgraph/supergraph, and APOLLO_KEY is set,
  * uses Rover to fetch that schema. Otherwise introspects the dev router endpoint.
  * DEV ONLY. Run: npm run mcp:schema
- *
- * Optional: npm run mcp:schema -- --schema Dev-TimecardService
- * (or use mcp:schema:timecard) to fetch a specific subgraph without changing selected-schema.json.
  */
 
 import { execSync } from "node:child_process";

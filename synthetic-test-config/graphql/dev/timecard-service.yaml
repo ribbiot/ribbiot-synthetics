@@ -120,17 +120,37 @@ queries:
         targetvalue: "a531bb92-a4cf-4375-9f84-a84a10f94b03"
 
   - name: formSubmissionsForInvoice
-    excluded: true
     synthetic_data:
-      - key: DEV_TIMECARD_INVOICE_START_DATE
-        purpose: startDate for formSubmissionsForInvoice(filters)
-        where_to_set: Terraform global
-        format: Date
       - key: DEV_TIMECARD_INVOICE_JOB_NUMBER
-        purpose: jobNumber for formSubmissionsForInvoice(filters)
-        where_to_set: Terraform global
+        value: "Datadog"
+        purpose: "jobNumber for formSubmissionsForInvoice(filters) — ListFormSubmissionsForInvoiceInput"
+        where_to_set: Terraform global DEV_TIMECARD_INVOICE_JOB_NUMBER
         format: String
-    notes: "Stub. ListFormSubmissionsForInvoiceInput: startDate!, endDate?, jobNumber!, order?, pageInfo?."
+      - key: DEV_TIMECARD_INVOICE_START_DATE
+        value: "2026-02-15"
+        purpose: startDate for formSubmissionsForInvoice(filters)
+        where_to_set: Terraform global DEV_TIMECARD_INVOICE_START_DATE
+        format: Date
+    notes: >
+      Query JobTimecards / formSubmissionsForInvoice. pageInfo in request uses limit 20 and empty nextPageKey (fixed in Terraform body).
+      Assertions filter by known dev fixture submission id so item order does not matter.
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+    assertions:
+      - jsonpath: "$.data.formSubmissionsForInvoice.pageInfo.hasNextPage"
+        operator: is
+        targetvalue: "false"
+      - jsonpath: "$.data.formSubmissionsForInvoice.items[?(@.id=='365068ee-d9b3-450a-99c4-b5614533f422')].formId"
+        operator: is
+        targetvalue: "a531bb92-a4cf-4375-9f84-a84a10f94b03"
+      - jsonpath: "$.data.formSubmissionsForInvoice.items[?(@.id=='365068ee-d9b3-450a-99c4-b5614533f422')].userId"
+        operator: is
+        targetvalue: "75c265a5-d519-4e61-8454-c1fb6ddd384f"
+      - jsonpath: "$.data.formSubmissionsForInvoice.items[?(@.id=='365068ee-d9b3-450a-99c4-b5614533f422')].totalHours"
+        operator: is
+        targetvalue: "4.00"
 
   - name: userFormSubmissions
     excluded: true

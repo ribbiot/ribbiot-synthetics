@@ -107,3 +107,8 @@ output "auth0_graphql_timecard_form_submissions_test_id" {
   description = "Datadog test ID for GraphQL: formSubmissions."
   value       = datadog_synthetics_test.auth0_graphql_timecard_form_submissions_dev.id
 }
+
+output "auth0_graphql_timecard_form_submissions_for_invoice_test_id" {
+  description = "Datadog test ID for GraphQL: formSubmissionsForInvoice."
+  value       = datadog_synthetics_test.auth0_graphql_timecard_form_submissions_for_invoice_dev.id
+}
