@@ -1,6 +1,3 @@
-# GraphQL synthetic data for Timecard service — DEV only.
-# Schema: docs/synthetic-test-config-schema.md
-
 scope: graphql
 environment: dev
 service: Timecard service
@@ -25,3 +22,279 @@ queries:
       - jsonpath: "$.data.timecardSystemCheck.sqlStatus"
         operator: is
         targetvalue: "OK"
+
+  - name: formTemplate
+    synthetic_data:
+      - key: DEV_TIMECARD_FORM_TEMPLATE_ID
+        value: "a531bb92-a4cf-4375-9f84-a84a10f94b03"
+        purpose: Form template ID for formTemplate(id) query
+        where_to_set: Terraform global DEV_TIMECARD_FORM_TEMPLATE_ID
+        format: ID
+    notes: "Maestro Crane Timecard template (dev). Query FormTemplate($formTemplateId: ID!)."
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+    assertions:
+      - jsonpath: "$.data.formTemplate.formTypeSlug"
+        operator: is
+        targetvalue: "timecard"
+      - jsonpath: "$.data.formTemplate.name"
+        operator: is
+        targetvalue: "Maestro Crane Timecard"
+
+  - name: formTemplates
+    synthetic_data:
+      - key: DEV_TIMECARD_ACCOUNT_ID
+        value: "dfb43473-e136-4ede-971f-3238b18d1f8b"
+        purpose: Account ID for formTemplates(accountId, filters?)
+        where_to_set: Terraform global DEV_TIMECARD_ACCOUNT_ID
+        format: ID
+    notes: "Query FormTemplates($accountId: ID!, $filters: ListFormTemplatesInput). No filters in request."
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+    assertions:
+      - jsonpath: "$.data.formTemplates[0].accountId"
+        operator: is
+        targetvalue: "dfb43473-e136-4ede-971f-3238b18d1f8b"
+      - jsonpath: "$.data.formTemplates[0].formType.slug"
+        operator: is
+        targetvalue: "inspection-form"
+      - jsonpath: "$.data.formTemplates[0].name"
+        operator: is
+        targetvalue: "North Star Lattice Inspection"
+
+  - name: formSubmission
+    synthetic_data:
+      - key: DEV_TIMECARD_FORM_SUBMISSION_ID
+        value: "d4744bfb-bd8b-4a62-a4f3-8e98316bd7a1"
+        purpose: Form submission ID for formSubmission(id) query
+        where_to_set: Terraform global DEV_TIMECARD_FORM_SUBMISSION_ID
+        format: ID
+    notes: "Query FormSubmission($formSubmissionId: ID!). Dev timecard submission (Maestro Crane Timecard)."
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+    assertions:
+      - jsonpath: "$.data.formSubmission.id"
+        operator: is
+        targetvalue: "d4744bfb-bd8b-4a62-a4f3-8e98316bd7a1"
+      - jsonpath: "$.data.formSubmission.accountId"
+        operator: is
+        targetvalue: "dfb43473-e136-4ede-971f-3238b18d1f8b"
+      - jsonpath: "$.data.formSubmission.formId"
+        operator: is
+        targetvalue: "a531bb92-a4cf-4375-9f84-a84a10f94b03"
+
+  - name: formSubmissions
+    synthetic_data:
+      - key: DEV_TIMECARD_FORM_ID_FOR_SUBMISSIONS
+        value: "a531bb92-a4cf-4375-9f84-a84a10f94b03"
+        purpose: "formId for formSubmissions(filters: ListFormSubmissionsInput!)"
+        where_to_set: Terraform global DEV_TIMECARD_FORM_ID_FOR_SUBMISSIONS
+        format: ID
+      - key: DEV_TIMECARD_SUBMISSIONS_START_DATE
+        value: "2026-03-18"
+        purpose: startDate for formSubmissions(filters)
+        where_to_set: Terraform global
+        format: Date
+      - key: DEV_TIMECARD_SUBMISSIONS_END_DATE
+        value: "2026-03-20"
+        purpose: endDate for formSubmissions(filters)
+        where_to_set: Terraform global
+        format: Date
+    notes: "Query FormSubmissions($filters: ListFormSubmissionsInput!). Filters formId, startDate, endDate."
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+    assertions:
+      - jsonpath: "$.data.formSubmissions.items[0].formId"
+        operator: is
+        targetvalue: "a531bb92-a4cf-4375-9f84-a84a10f94b03"
+      - jsonpath: "$.data.formSubmissions.items[1].formId"
+        operator: is
+        targetvalue: "a531bb92-a4cf-4375-9f84-a84a10f94b03"
+
+  - name: formSubmissionsForInvoice
+    synthetic_data:
+      - key: DEV_TIMECARD_INVOICE_JOB_NUMBER
+        value: "Datadog"
+        purpose: "jobNumber for formSubmissionsForInvoice(filters) — ListFormSubmissionsForInvoiceInput"
+        where_to_set: Terraform global DEV_TIMECARD_INVOICE_JOB_NUMBER
+        format: String
+      - key: DEV_TIMECARD_INVOICE_START_DATE
+        value: "2026-02-15"
+        purpose: startDate for formSubmissionsForInvoice(filters)
+        where_to_set: Terraform global DEV_TIMECARD_INVOICE_START_DATE
+        format: Date
+    notes: >
+      Query JobTimecards / formSubmissionsForInvoice. pageInfo in request uses limit 20 and empty nextPageKey (fixed in Terraform body).
+      Assertions filter by known dev fixture submission id so item order does not matter.
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+    assertions:
+      - jsonpath: "$.data.formSubmissionsForInvoice.pageInfo.hasNextPage"
+        operator: is
+        targetvalue: "false"
+      - jsonpath: "$.data.formSubmissionsForInvoice.items[?(@.id=='365068ee-d9b3-450a-99c4-b5614533f422')].formId"
+        operator: is
+        targetvalue: "a531bb92-a4cf-4375-9f84-a84a10f94b03"
+      - jsonpath: "$.data.formSubmissionsForInvoice.items[?(@.id=='365068ee-d9b3-450a-99c4-b5614533f422')].userId"
+        operator: is
+        targetvalue: "75c265a5-d519-4e61-8454-c1fb6ddd384f"
+      - jsonpath: "$.data.formSubmissionsForInvoice.items[?(@.id=='365068ee-d9b3-450a-99c4-b5614533f422')].totalHours"
+        operator: is
+        targetvalue: "4.00"
+
+  - name: userFormSubmissions
+    excluded: true
+    synthetic_data:
+      - key: DEV_TIMECARD_USER_FORM_IDS
+        purpose: "formIds for userFormSubmissions(filters: UserFormSubmissionsInput!)"
+        where_to_set: Terraform global (JSON array of ID)
+        format: JSON array of ID
+    notes: "Stub. UserFormSubmissionsInput: formIds!, startDate?, endDate?, order?, pageInfo?."
+
+  - name: formPDFConfig
+    synthetic_data:
+      - key: DEV_TIMECARD_FORM_ID_FOR_PDF_CONFIG
+        value: "a531bb92-a4cf-4375-9f84-a84a10f94b03"
+        purpose: "formId for formPDFConfig(formId: ID) query"
+        where_to_set: Terraform global DEV_TIMECARD_FORM_ID_FOR_PDF_CONFIG
+        format: ID
+    notes: "Query FormPDFConfig($formId: ID). PDF config (css/hbs templates, fields) for a form. Uses same form ID as Maestro Crane Timecard template."
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+    assertions:
+      - jsonpath: "$.data.formPDFConfig.fields[2].label"
+        operator: is
+        targetvalue: "timecardNumber"
+      - jsonpath: "$.data.formPDFConfig.fields[2].format"
+        operator: is
+        targetvalue: "STRING"
+
+  - name: formType
+    synthetic_data:
+      - key: DEV_TIMECARD_FORM_TYPE_SLUG
+        value: "timecard"
+        purpose: "slug for formType(slug: String!) query"
+        where_to_set: Terraform global DEV_TIMECARD_FORM_TYPE_SLUG
+        format: String
+    notes: "Query FormType($slug: String!). Returns form type metadata (e.g. timecard)."
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+    assertions:
+      - jsonpath: "$.data.formType.slug"
+        operator: is
+        targetvalue: "timecard"
+      - jsonpath: "$.data.formType.displayName"
+        operator: is
+        targetvalue: "Timecard"
+      - jsonpath: "$.data.formType.isGlobal"
+        operator: is
+        targetvalue: "true"
+
+  - name: formTypes
+    synthetic_data: []
+    notes: "Query FormTypes (no args). Returns list of form types (timecard, inspection-form, etc.)."
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+    assertions:
+      - jsonpath: "$.data.formTypes[0].slug"
+        operator: is
+        targetvalue: "timecard"
+      - jsonpath: "$.data.formTypes[0].displayName"
+        operator: is
+        targetvalue: "Timecard"
+      - jsonpath: "$.data.formTypes[1].slug"
+        operator: is
+        targetvalue: "inspection-form"
+
+  - name: formTypeAccount
+    excluded: true
+    synthetic_data:
+      - key: DEV_TIMECARD_FORM_TYPE_SLUG
+        purpose: formTypeSlug for formTypeAccount(formTypeSlug, accountId)
+        where_to_set: Terraform global
+        format: String
+      - key: DEV_TIMECARD_ACCOUNT_ID
+        purpose: accountId for formTypeAccount(formTypeSlug, accountId)
+        where_to_set: Terraform global DEV_TIMECARD_ACCOUNT_ID
+        format: ID
+    notes: Stub. Both formTypeSlug and accountId required.
+
+  - name: formTypeAccounts
+    excluded: true
+    synthetic_data:
+      - key: DEV_TIMECARD_ACCOUNT_ID
+        purpose: accountId for formTypeAccounts(accountId) query
+        where_to_set: Terraform global DEV_TIMECARD_ACCOUNT_ID
+        format: ID
+    notes: Stub. Returns [GqlFormTypeAccount!]!.
+
+  - name: formTemplateHomePage
+    synthetic_data:
+      - key: DEV_TIMECARD_ACCOUNT_ID
+        value: "dfb43473-e136-4ede-971f-3238b18d1f8b"
+        purpose: accountId for formTemplateHomePage(accountId) (optional on schema; passed explicitly for stable synthetics)
+        where_to_set: Terraform global DEV_TIMECARD_ACCOUNT_ID
+        format: ID
+    notes: "Query FormTemplateHomePage($accountId: ID). quickLinks for home page; same dev account as formTemplates."
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+    assertions:
+      - jsonpath: "$.data.formTemplateHomePage.quickLinks[0].accountId"
+        operator: is
+        targetvalue: "dfb43473-e136-4ede-971f-3238b18d1f8b"
+      - jsonpath: "$.data.formTemplateHomePage.quickLinks[0].formId"
+        operator: is
+        targetvalue: "a531bb92-a4cf-4375-9f84-a84a10f94b03"
+      - jsonpath: "$.data.formTemplateHomePage.quickLinks[0].formType.slug"
+        operator: is
+        targetvalue: "timecard"
+      - jsonpath: "$.data.formTemplateHomePage.quickLinks[0].formType.displayName"
+        operator: is
+        targetvalue: "Timecard"
+      - jsonpath: "$.data.formTemplateHomePage.quickLinks[0].formTemplate.id"
+        operator: is
+        targetvalue: "a531bb92-a4cf-4375-9f84-a84a10f94b03"
+      - jsonpath: "$.data.formTemplateHomePage.quickLinks[0].divisionIds[0]"
+        operator: is
+        targetvalue: "413a53b4-a21f-4266-b810-3c1b3b27904d"
+      - jsonpath: "$.data.formTemplateHomePage.quickLinks[0].displayName"
+        operator: is
+        targetvalue: "Maestro Crane Timecard"
+      - jsonpath: "$.data.formTemplateHomePage.quickLinks[0].ordinal"
+        operator: is
+        targetvalue: "0"
+
+  - name: formTemplateNotificationConfig
+    synthetic_data:
+      - key: DEV_TIMECARD_FORM_TEMPLATE_ID
+        value: "a531bb92-a4cf-4375-9f84-a84a10f94b03"
+        purpose: formTemplateId for formTemplateNotificationConfig(formTemplateId!)
+        where_to_set: Terraform global DEV_TIMECARD_FORM_TEMPLATE_ID
+        format: ID
+    notes: "Query FormTemplateNotificationConfig($formTemplateId: ID!). Dev returns null for Maestro Crane template (no notification config yet); synthetic still proves resolver + auth path work."
+    locations:
+      - aws:us-east-1
+      - aws:us-west-2
+      - gcp:us-west1
+    assertions:
+      - jsonpath: "$.data.formTemplateNotificationConfig"
+        operator: is
+        targetvalue: "null"

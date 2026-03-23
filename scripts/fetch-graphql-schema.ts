@@ -10,6 +10,8 @@ import { execSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
+const SCHEMA_OPTIONS_PATH = resolve(process.cwd(), "config/schema-options.json");
+
 const INTROSPECTION_QUERY = `
   query IntrospectionQuery {
     __schema {
@@ -118,6 +120,38 @@ type SelectedSchema = {
   graphRef?: string;
 };
 
+type SchemaOption = {
+  id: string;
+  label: string;
+  roverType?: "subgraph" | "supergraph";
+  roverName?: string;
+};
+
+/** Parse --schema=Dev-TimecardService from argv to force a specific schema (from schema-options.json). */
+function getSchemaOverride(): string | null {
+  const arg = process.argv.slice(2).find((a) => a.startsWith("--schema="));
+  if (!arg) return null;
+  return arg.slice("--schema=".length).trim() || null;
+}
+
+function loadSchemaOption(schemaId: string): SelectedSchema | null {
+  try {
+    const raw = readFileSync(SCHEMA_OPTIONS_PATH, "utf-8");
+    const config = JSON.parse(raw) as { graphRef?: string; options: SchemaOption[] };
+    const option = config.options.find((o) => o.id === schemaId);
+    if (!option || !option.roverType) return null;
+    return {
+      id: option.id,
+      label: option.label,
+      roverType: option.roverType,
+      roverName: option.roverName,
+      graphRef: config.graphRef,
+    };
+  } catch {
+    return null;
+  }
+}
+
 function tryRoverFetch(selected: SelectedSchema): string | null {
   if (!selected.roverType || !process.env.APOLLO_KEY) return null;
   const graphRef = selected.graphRef ?? process.env.APOLLO_GRAPH_REF ?? "Ribbiot-Serverless@dev-current";
@@ -145,16 +179,32 @@ async function main(): Promise<void> {
   const outPath = resolve(process.cwd(), "config/schema.graphql");
   const selectedPath = resolve(process.cwd(), "config/selected-schema.json");
 
-  let sdl: string | null = null;
-  try {
-    const selectedRaw = readFileSync(selectedPath, "utf-8");
-    const selected = JSON.parse(selectedRaw) as SelectedSchema;
-    if (selected.id != null && selected.roverType) {
-      sdl = tryRoverFetch(selected);
-          if (sdl) console.log("Fetched via Rover:", selected.label);
+  const schemaOverride = getSchemaOverride();
+  let selected: SelectedSchema | null = null;
+
+  if (schemaOverride) {
+    selected = loadSchemaOption(schemaOverride);
+    if (!selected) {
+      console.error("Unknown --schema=%s. Check config/schema-options.json for valid ids (e.g. Dev-TimecardService).", schemaOverride);
+      process.exit(1);
     }
-  } catch {
-    // No selection or invalid; fall back to introspection
+  } else {
+    try {
+      const selectedRaw = readFileSync(selectedPath, "utf-8");
+      selected = JSON.parse(selectedRaw) as SelectedSchema;
+    } catch {
+      // No selection or invalid; fall back to introspection
+    }
+  }
+
+  let sdl: string | null = null;
+  if (selected?.id != null && selected.roverType) {
+    sdl = tryRoverFetch(selected);
+    if (sdl) console.log("Fetched via Rover:", selected.label);
+    else if (schemaOverride) {
+      console.error("Fetch failed for --schema=%s. Set APOLLO_KEY in .env and ensure Rover is installed (npm i -g @apollo/rover).", schemaOverride);
+      process.exit(1);
+    }
   }
 
   if (!sdl) {

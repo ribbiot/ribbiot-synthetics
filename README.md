@@ -124,7 +124,7 @@ From the repo root, after `npm install`:
 | `npm run mcp:start` | Start Apollo MCP Server (no auth). Cursor can introspect schema and run GraphQL queries. |
 | `npm run mcp:start:auth` | Get Auth0 token and start MCP server with it so Cursor runs *authenticated* queries. |
 | `npm run mcp:auth` | Print a fresh Auth0 access token (for debugging; requires dev credentials in `.env`). |
-| `npm run mcp:schema` | Fetch schema and write `config/schema.graphql`. Uses Rover for the selected subgraph/supergraph if `APOLLO_KEY` is set; otherwise introspects the router. |
+| `npm run mcp:schema` | Fetch schema and write `config/schema.graphql`. Uses Rover for the subgraph chosen via `mcp:select-schema` (or pass `--schema=Dev-TimecardService` etc.; ids in `config/schema-options.json`) if `APOLLO_KEY` is set; otherwise introspects the router. |
 
 Ensure a `.env` file exists (copy from `.env.example`) with `TF_VAR_*` and any other variables Terraform needs. All `tf:*` commands load `.env` automatically via `dotenv-cli`. For authenticated MCP, the same Auth0 vars as the dev GraphQL synthetics are required (`TF_VAR_dev_username`, `TF_VAR_dev_password`, `TF_VAR_dev_client_secret`).
 
@@ -138,9 +138,9 @@ We use **Apollo MCP Server** and **Cursor** to explore the dev GraphQL API (sche
 
 The dev graph is federated (Asset, Job, Timecard, User services, plus supergraph/API). To work on one schema at a time instead of the whole API:
 
-1. Run **`npm run mcp:select-schema`** and choose the schema (e.g. Asset Service, User Service, or Supergraph).
-2. Your choice is saved to `config/selected-schema.json` (gitignored). Then **`npm run mcp:schema`** (and **`mcp:start:auth`**) will use it: with **Rover** installed and **APOLLO_KEY** (and optional **APOLLO_GRAPH_REF**) in `.env`, the schema is fetched from GraphOS for that subgraph/supergraph; otherwise the script falls back to introspecting the router.
-3. Option **“Use router introspection (full API)”** skips Rover and keeps the current behavior (full composed schema from the router).
+1. Run **`npm run mcp:select-schema`** and choose the schema (e.g. Timecard, Asset, User, or Supergraph), **or** skip the prompt with **`npm run mcp:schema -- --schema=Dev-TimecardService`** (any id from `config/schema-options.json`).
+2. If you used **`mcp:select-schema`**, your choice is saved to `config/selected-schema.json` (gitignored). Then **`npm run mcp:schema`** (and **`mcp:start:auth`**) will use it: with **Rover** installed and **APOLLO_KEY** (and optional **APOLLO_GRAPH_REF**) in `.env`, the schema is fetched from GraphOS for that subgraph/supergraph; otherwise the script falls back to introspecting the router.
+3. Option **“Use router introspection (full API)”** in the selector skips Rover and keeps the current behavior (full composed schema from the router).
 
 Schema options and Studio links are in `config/schema-options.json`.
 

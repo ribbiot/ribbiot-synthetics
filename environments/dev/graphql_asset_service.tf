@@ -10,7 +10,7 @@
 # ------------------------------------------------------------------------------
 
 # Synthetic data globals (e.g. DEV_ASSET_ACCOUNT_ID) come from var.synthetic_data_values in graphql.tf.
-# Asset tests use framework default: var.default_locations (3 geos), var.default_frequency (2 hours).
+# Asset tests use framework default: var.default_locations (3 geos), var.default_frequency (e.g. 604800 = once/week).
 locals {
   graphql_endpoint = "https://ribbiot-router-dev.up.railway.app/graphql"
 

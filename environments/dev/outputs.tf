@@ -72,3 +72,43 @@ output "auth0_graphql_timecard_system_check_test_id" {
   description = "Datadog test ID for GraphQL: timecardSystemCheck."
   value       = datadog_synthetics_test.auth0_graphql_timecard_system_check_dev.id
 }
+
+output "auth0_graphql_timecard_form_template_test_id" {
+  description = "Datadog test ID for GraphQL: formTemplate."
+  value       = datadog_synthetics_test.auth0_graphql_timecard_form_template_dev.id
+}
+
+output "auth0_graphql_timecard_form_templates_test_id" {
+  description = "Datadog test ID for GraphQL: formTemplates."
+  value       = datadog_synthetics_test.auth0_graphql_timecard_form_templates_dev.id
+}
+
+output "auth0_graphql_timecard_form_submission_test_id" {
+  description = "Datadog test ID for GraphQL: formSubmission."
+  value       = datadog_synthetics_test.auth0_graphql_timecard_form_submission_dev.id
+}
+
+output "auth0_graphql_timecard_form_type_test_id" {
+  description = "Datadog test ID for GraphQL: formType."
+  value       = datadog_synthetics_test.auth0_graphql_timecard_form_type_dev.id
+}
+
+output "auth0_graphql_timecard_form_types_test_id" {
+  description = "Datadog test ID for GraphQL: formTypes."
+  value       = datadog_synthetics_test.auth0_graphql_timecard_form_types_dev.id
+}
+
+output "auth0_graphql_timecard_form_pdf_config_test_id" {
+  description = "Datadog test ID for GraphQL: formPDFConfig."
+  value       = datadog_synthetics_test.auth0_graphql_timecard_form_pdf_config_dev.id
+}
+
+output "auth0_graphql_timecard_form_submissions_test_id" {
+  description = "Datadog test ID for GraphQL: formSubmissions."
+  value       = datadog_synthetics_test.auth0_graphql_timecard_form_submissions_dev.id
+}
+
+output "auth0_graphql_timecard_form_submissions_for_invoice_test_id" {
+  description = "Datadog test ID for GraphQL: formSubmissionsForInvoice."
+  value       = datadog_synthetics_test.auth0_graphql_timecard_form_submissions_for_invoice_dev.id
+}
